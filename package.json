@@ -1,0 +1,39 @@
+{
+  "name": "mettle-backoffice-fe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.0",
+    "@mui/material": "^5.15.0",
+    "@sentry/nextjs": "^7.88.0",
+    "@tanstack/react-query": "^5.12.2",
+    "antd": "^5.12.1",
+    "axios": "^1.6.2",
+    "firebase": "^10.7.0",
+    "next": "14.0.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-google-charts": "^4.0.1",
+    "react-password-strength-bar": "^0.4.1"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.3",
+    "husky": "^8.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5"
+  }
+}

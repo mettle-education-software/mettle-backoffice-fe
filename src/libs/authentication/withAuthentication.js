@@ -1,0 +1,59 @@
+'use client';
+
+import { auth } from 'config/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
+// eslint-disable-next-line react/display-name
+export const withAuthentication = (Component) => (props) => {
+    const [nextOrObserver, setNextOrObserver] = useState(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        auth.onAuthStateChanged(async (authUser) => {
+            setNextOrObserver(authUser);
+
+            if (!authUser) {
+                router.push('/');
+            }
+
+            try {
+                const token = await authUser.getIdTokenResult();
+                const { claims } = token;
+                if (!claims?.roles?.some((role) => ['MBM_ADMIN'].includes(role))) {
+                    signOut(auth);
+                    router.push('/');
+                }
+            } catch (error) {
+                signOut(auth);
+                router.push('/');
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (nextOrObserver) {
+        return <Component {...props} userUid={nextOrObserver.uid} />;
+    }
+};
+
+// eslint-disable-next-line react/display-name
+export const withoutAuthentication = (Component) => (props) => {
+    const [nextOrObserver, setNextOrObserver] = useState({});
+    const router = useRouter();
+
+    useEffect(() => {
+        auth.onAuthStateChanged((authUser) => {
+            setNextOrObserver(authUser);
+            if (authUser) {
+                router.push('/home');
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (!nextOrObserver) {
+        return <Component {...props} />;
+    }
+};
