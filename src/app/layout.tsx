@@ -1,11 +1,10 @@
 'use client';
 
-import { Spin, ConfigProvider } from 'antd';
+import { Spin, ConfigProvider, ThemeConfig } from 'antd';
 import { Roboto } from 'next/font/google';
 import { AppProvider, useAppContext } from 'providers';
 import React from 'react';
-import darkToken from 'themes/dark.json';
-import lightToken from 'themes/light.json';
+import { darkTheme, lightTheme } from 'themes';
 import '../styles/globals.css';
 
 const roboto = Roboto({
@@ -17,8 +16,10 @@ const roboto = Roboto({
 const App = ({ children }: { children: React.ReactNode }) => {
     const { theme, isAppLoading } = useAppContext();
 
+    const themeConfig: ThemeConfig | undefined = theme === 'light' ? lightTheme : darkTheme;
+
     return (
-        <ConfigProvider theme={theme === 'light' ? lightToken : darkToken}>
+        <ConfigProvider theme={themeConfig}>
             <body>
                 <main className={roboto.className} data-theme={theme}>
                     <Spin spinning={isAppLoading}>{children}</Spin>
