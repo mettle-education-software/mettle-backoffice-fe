@@ -1,11 +1,6 @@
 'use client';
 
-import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    DashboardOutlined,
-    FormOutlined,
-} from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, FormOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout, Menu } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
