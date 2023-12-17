@@ -21,7 +21,7 @@ export const withAuthentication = (Component) => (props) => {
             try {
                 const token = await authUser.getIdTokenResult();
                 const { claims } = token;
-                if (!claims?.roles?.some((role) => ['MBM_ADMIN'].includes(role))) {
+                if (!claims?.roles?.some((role) => ['METTLE_ADMIN'].includes(role))) {
                     signOut(auth);
                     router.push('/');
                 }

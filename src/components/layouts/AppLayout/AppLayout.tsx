@@ -4,9 +4,7 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     DashboardOutlined,
-    TableOutlined,
     FormOutlined,
-    ControlOutlined,
 } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout, Menu } from 'antd';
@@ -121,7 +119,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
                             {
                                 key: 'home',
                                 icon: <DashboardOutlined />,
-                                label: 'Mettle Analytics',
+                                label: 'Dashboard',
                                 onClick: ({ domEvent }) => {
                                     domEvent.preventDefault();
                                     router.push('/home');

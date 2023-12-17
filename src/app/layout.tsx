@@ -2,7 +2,7 @@
 
 import { Spin, ConfigProvider, ThemeConfig } from 'antd';
 import { Roboto } from 'next/font/google';
-import { AppProvider, useAppContext } from 'providers';
+import { AppProvider, NotificationsProvider, useAppContext } from 'providers';
 import React from 'react';
 import { darkTheme, lightTheme } from 'themes';
 import '../styles/globals.css';
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="pt">
             <head>
-                <title>Mettle Business Manager - Bem-vindo!</title>
+                <title>Mettle Backoffice Admin</title>
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
                 <link rel="icon" href="/favicon.ico" />
                 <meta name="description" content="Mettle Business Manager" />
@@ -42,7 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel="apple-touch-icon" href="/mettle.png" />
             </head>
             <AppProvider>
-                <App>{children}</App>
+                <NotificationsProvider>
+                    <App>{children}</App>
+                </NotificationsProvider>
             </AppProvider>
         </html>
     );
