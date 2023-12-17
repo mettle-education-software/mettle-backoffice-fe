@@ -4,12 +4,15 @@ import { HTTPOptions, HTTPResponse, HTTPClient } from 'interfaces';
 
 const mettleApiUrl = process.env.METTLE_API_URL;
 
+type TServiceName = 'accounts' | 'emailing' | 'lamp' | 'melp' | 'business' | 'admin' | 'short-list' | string;
+const TServiceNameArray: TServiceName[] = ['accounts', 'emailing', 'lamp', 'melp', 'business', 'admin', 'short-list'];
+
 class ApiClient implements HTTPClient {
     baseUrl: string | undefined;
     client: AxiosInstance;
 
-    constructor(private serviceName: 'accounts' | 'emailing' | 'lamp' | 'melp' | 'business' | string) {
-        if (['accounts', 'emailing', 'lamp', 'melp', 'business'].includes(serviceName)) {
+    constructor(private serviceName: TServiceName) {
+        if (TServiceNameArray.includes(serviceName)) {
             this.serviceName = serviceName;
             this.baseUrl = mettleApiUrl;
             this.client = axios.create({

@@ -1,4 +1,17 @@
 import { ThemeConfig } from 'antd';
+import { Roboto, Lato } from 'next/font/google';
+
+const roboto = Roboto({
+    subsets: ['latin'],
+    display: 'swap',
+    weight: ['100', '300', '400', '500', '700', '900'],
+});
+
+const lato = Lato({
+    subsets: ['latin'],
+    display: 'swap',
+    weight: ['100', '300', '400', '700', '900'],
+});
 
 export const darkTheme: ThemeConfig = {
     token: {
@@ -11,5 +24,6 @@ export const darkTheme: ThemeConfig = {
         colorBgBase: '#3c362f',
         colorPrimary: '#f2d5b1',
         colorInfo: '#f2d5b1',
+        fontFamily: roboto.style.fontFamily,
     },
 };
