@@ -1,17 +1,10 @@
 'use client';
 
 import { Spin, ConfigProvider, ThemeConfig } from 'antd';
-import { Roboto } from 'next/font/google';
 import { AppProvider, NotificationsProvider, useAppContext } from 'providers';
 import React from 'react';
 import { darkTheme, lightTheme } from 'themes';
 import '../styles/globals.css';
-
-const roboto = Roboto({
-    subsets: ['latin'],
-    display: 'swap',
-    weight: ['100', '300', '400', '500', '700', '900'],
-});
 
 const App = ({ children }: { children: React.ReactNode }) => {
     const { theme, isAppLoading } = useAppContext();
@@ -21,7 +14,7 @@ const App = ({ children }: { children: React.ReactNode }) => {
     return (
         <ConfigProvider theme={themeConfig}>
             <body>
-                <main className={roboto.className} data-theme={theme}>
+                <main data-theme={theme}>
                     <Spin spinning={isAppLoading}>{children}</Spin>
                 </main>
             </body>
@@ -36,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <title>Mettle Backoffice Admin</title>
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
                 <link rel="icon" href="/favicon.ico" />
-                <meta name="description" content="Mettle Business Manager" />
+                <meta name="description" content="Mettle Backoffice Admin" />
                 <meta property="og:title" content="Mettle" />
                 <meta property="og:image" content="/mettle.png" />
                 <link rel="apple-touch-icon" href="/mettle.png" />

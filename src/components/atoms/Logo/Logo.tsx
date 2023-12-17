@@ -1,5 +1,7 @@
 'use client';
 
+import { useAppContext } from 'providers';
+
 const logos = {
     light: (
         <svg
@@ -93,6 +95,7 @@ const logos = {
     ),
 };
 
-export const Logo = ({ theme = 'light' }: { theme?: 'light' | 'dark' }) => {
+export const Logo = () => {
+    const { theme } = useAppContext();
     return logos[theme];
 };

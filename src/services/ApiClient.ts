@@ -4,8 +4,8 @@ import { HTTPOptions, HTTPResponse, HTTPClient } from 'interfaces';
 
 const mettleApiUrl = process.env.METTLE_API_URL;
 
-type TServiceName = 'accounts' | 'emailing' | 'lamp' | 'melp' | 'business' | 'admin' | string;
-const TServiceNameArray: TServiceName[] = ['accounts', 'emailing', 'lamp', 'melp', 'business', 'admin'];
+type TServiceName = 'accounts' | 'emailing' | 'lamp' | 'melp' | 'business' | 'admin' | 'short-list' | string;
+const TServiceNameArray: TServiceName[] = ['accounts', 'emailing', 'lamp', 'melp', 'business', 'admin', 'short-list'];
 
 class ApiClient implements HTTPClient {
     baseUrl: string | undefined;

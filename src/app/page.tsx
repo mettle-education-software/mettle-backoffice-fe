@@ -104,7 +104,7 @@ function Login() {
                 <LogoWrapper>
                     <Logo />
                 </LogoWrapper>
-                <Text level="h1" fontWeight="500" size="2rem">
+                <Text level="h1" fontWeight="500" size="2rem" fontColor="secondary">
                     Backoffice
                 </Text>
             </LogoContainer>

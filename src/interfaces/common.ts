@@ -73,3 +73,7 @@ export interface IFormObject {
     fieldProps: Record<string, any>;
     Field: React.FC<React.PropsWithoutRef<any>>;
 }
+
+export interface IResponseMessage {
+    message: string;
+}

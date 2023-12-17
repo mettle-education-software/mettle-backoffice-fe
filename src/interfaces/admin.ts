@@ -21,6 +21,65 @@ export interface IProductDTO {
     productPrice: number;
 }
 
+export interface IMettleUser {
+    accountStatus: {
+        purchasedProducts: string[];
+        purchaseDate: {
+            _seconds: number;
+            _nanoseconds: number;
+        };
+        isUserNewApi: boolean;
+        melpStartDate: {
+            _seconds: number;
+            _nanoseconds: number;
+        };
+        payment: string;
+        dedaStart: {
+            isDedaStartConfirmed: boolean;
+            startDates: any[];
+        };
+        isTutorialWatched: boolean;
+        pause: {
+            pauseDates: any[];
+            lastPauseDate: null;
+            pauseWeek: null;
+            isAccountPaused: boolean;
+        };
+    };
+    settings: {
+        remainingPauses: number;
+        theme: string;
+        remainingResetAttempts: number;
+        notifications: boolean;
+    };
+    userData: {
+        firstName: string;
+        lastName: string;
+        uid: string;
+        email: string;
+        transactionId: string;
+        profilePhotoUrl: null;
+    };
+    unlockedDEDAs: string[];
+    notifications: {
+        link: string;
+        isRead: boolean;
+        description: string;
+        title: string;
+    }[];
+    currentTime: {
+        currentDay: number;
+        currentWeek: number;
+        daysSinceMelpBegin: number;
+        daysSinceFirstPurchase: number;
+    };
+}
+
+export interface IMettleUsersResponse {
+    data: IMettleUser[];
+    pagination: IPagination;
+}
+
 export interface IProductsResponse {
     data: IProduct[];
     pagination: IPagination;

@@ -2,6 +2,7 @@
 
 import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, FormOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
+import GroupIcon from '@mui/icons-material/Group';
 import { Layout, Menu } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -122,7 +123,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
                             },
                             {
                                 key: 'accounts',
-                                icon: <FormOutlined />,
+                                icon: <GroupIcon />,
                                 label: 'Contas',
                                 onClick: ({ domEvent }) => {
                                     domEvent.preventDefault();

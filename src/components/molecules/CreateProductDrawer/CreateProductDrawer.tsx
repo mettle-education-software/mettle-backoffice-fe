@@ -62,7 +62,7 @@ export const CreateProductDrawer = ({ open, onClose }: DrawerProps) => {
         <Drawer title="Criar novo produto" open={open} onClose={handleClose}>
             <Row>
                 <Col span={24}>
-                    <Form layout="vertical" size="large" onFinish={handleCreateProduct}>
+                    <Form form={form} layout="vertical" size="large" onFinish={handleCreateProduct}>
                         <Form.Item name="productName" label="Nome do produto" rules={formRules.productName}>
                             <Input type="text" placeholder="Acesso total..." />
                         </Form.Item>
@@ -77,7 +77,7 @@ export const CreateProductDrawer = ({ open, onClose }: DrawerProps) => {
                             <InputNumber placeholder="199.99" style={{ width: '100%' }} prefix="R$" />
                         </Form.Item>
 
-                        <Button type="primary" htmlType="submit" block>
+                        <Button type="primary" htmlType="submit" block loading={createMettleProduct.isPending}>
                             Criar produto
                         </Button>
                     </Form>

@@ -1,7 +1,7 @@
 'use client';
 
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Spin } from 'antd';
+import { Button, Card, Col, Row, Spin, Modal } from 'antd';
 import { Text, AppLayout, CreateProductDrawer } from 'components';
 import { useDeleteMettleProduct, useGetBackofficeDashboard, useGetMettleProducts } from 'hooks';
 import { IProduct } from 'interfaces';
@@ -34,10 +34,24 @@ const ProductCard = ({
         });
     };
 
+    const handleModal = () => {
+        Modal.confirm({
+            title: 'Remover produto',
+            content: 'Você tem certeza que deseja remover este produto?',
+            okText: 'Sim',
+            okButtonProps: {
+                danger: true,
+                loading: deleteProduct.isPending,
+            },
+            cancelText: 'Não',
+            onOk: handleDeleteProduct,
+        });
+    };
+
     const cardActions = () => (
         <Row gutter={12}>
             <Col>
-                <Button type="default" shape="default" onClick={handleDeleteProduct} icon={<DeleteOutlined />} />
+                <Button type="default" shape="default" onClick={handleModal} icon={<DeleteOutlined />} />
             </Col>
         </Row>
     );
@@ -79,12 +93,12 @@ function Home() {
                     <Col span={24}>
                         <Row gutter={16}>
                             <Col>
-                                <Card title={<Text level="h5">Quantidade de usuários na Mettle</Text>}>
+                                <Card title={<Text level="h4">Usuários na Mettle</Text>}>
                                     <Text level="h1">{dashboardData?.usersCount}</Text>
                                 </Card>
                             </Col>
                             <Col>
-                                <Card title={<Text level="h5">Quantidade de empresas na Mettle</Text>}>
+                                <Card title={<Text level="h4">Empresas na Mettle</Text>}>
                                     <Text level="h1">{dashboardData?.businessCount}</Text>
                                 </Card>
                             </Col>
@@ -92,7 +106,7 @@ function Home() {
                     </Col>
 
                     <Col span={24}>
-                        <Row justify="start" gutter={24}>
+                        <Row justify="start" align="middle" gutter={24}>
                             <Col>
                                 <Text level="h2" fontWeight="400">
                                     Produtos

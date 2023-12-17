@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { IBackofficeDashboardResponse, IProductsResponse, IProductDTO } from 'interfaces';
+import {
+    IBackofficeDashboardResponse,
+    IProductsResponse,
+    IProductDTO,
+    QueryParams,
+    IMettleUsersResponse,
+} from 'interfaces';
 import { adminService } from 'services';
 
 export const useGetBackofficeDashboard = () => {
@@ -25,6 +31,9 @@ export const useCreateMettleProduct = () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-products'],
             });
+            await queryClient.invalidateQueries({
+                queryKey: ['get-products-short-list'],
+            });
         },
     });
 };
@@ -38,6 +47,16 @@ export const useDeleteMettleProduct = () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-products'],
             });
+            await queryClient.invalidateQueries({
+                queryKey: ['get-products-short-list'],
+            });
         },
+    });
+};
+
+export const useGetMettleUsers = (params: QueryParams) => {
+    return useQuery({
+        queryKey: ['get-mettle-users', params],
+        queryFn: () => adminService.get<IMettleUsersResponse>('/users', { params }).then(({ data }) => data),
     });
 };
