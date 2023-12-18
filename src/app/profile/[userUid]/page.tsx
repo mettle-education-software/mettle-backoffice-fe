@@ -16,7 +16,7 @@ function Profile({ userUid }: { userUid: string }) {
                     <Col span={24}>
                         <Row gutter={24} justify="start" align="top">
                             <Col>
-                                <ProfilePicture />
+                                <ProfilePicture src={null} />
                             </Col>
                             <Col>
                                 <Row gutter={[24, 12]}>
