@@ -1,20 +1,32 @@
 'use client';
 
-import { Table, Modal } from 'antd';
+import { Table, Modal, Input, Row, Col } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { fromUnixTime } from 'date-fns';
-import { useDeleteMettleUser, useGetMettleUsers } from 'hooks';
+import { useDeleteMettleUser, useGetMettleUsers, useMakeUserAdmin } from 'hooks';
 import { IMettleUser, QueryParams } from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ActionsDropdown, Text } from '../../atoms';
 
-const useTableColumns = () => {
+const useTableColumns = ({ setQueryParams }: { setQueryParams: React.Dispatch<React.SetStateAction<QueryParams>> }) => {
     const router = useRouter();
     const { showNotification } = useNotificationsContext();
     const deleteMettleUser = useDeleteMettleUser();
+    const makeUserAdmin = useMakeUserAdmin();
+
+    const handleMakeUserAdmin = (userUid: string) => {
+        makeUserAdmin.mutate(userUid, {
+            onSuccess: () => {
+                showNotification('success', 'Successo', 'Usuário promovido com sucesso');
+            },
+            onError: (error) => {
+                showNotification('error', 'Erro', error.message || 'Algo deu errado. Tente novamente mais tarde.');
+            },
+        });
+    };
 
     const handleDeleteUser = (userUid: string) => {
         deleteMettleUser.mutate(userUid, {
@@ -29,7 +41,27 @@ const useTableColumns = () => {
 
     const columns: ColumnsType<IMettleUser> = [
         {
-            title: 'E-mail',
+            title: (
+                <Row gutter={18} align="middle" justify="space-between">
+                    <Col>
+                        <Text level="span" fontWeight="500">
+                            E-mail
+                        </Text>
+                    </Col>
+                    <Col>
+                        <Input.Search
+                            placeholder="Pesquisar"
+                            onSearch={(value) => {
+                                setQueryParams((previous) => ({
+                                    ...previous,
+                                    q: !!value ? value : undefined,
+                                }));
+                            }}
+                            allowClear
+                        />
+                    </Col>
+                </Row>
+            ),
             dataIndex: 'userData',
             render: (value) => value?.email,
         },
@@ -80,6 +112,24 @@ const useTableColumns = () => {
                             },
                         },
                         {
+                            key: 'makeAdmin',
+                            label: 'Tornar administrador da Mettle',
+                            onClick: ({ domEvent }) => {
+                                domEvent.preventDefault();
+                                Modal.confirm({
+                                    title: 'Tornar usuário administrador',
+                                    content:
+                                        'Este usuário terá permissões de administrador e poderá acessar o Backoffice. Deseja continuar?',
+                                    okText: 'Sim',
+                                    okButtonProps: {
+                                        type: 'primary',
+                                    },
+                                    cancelText: 'Não',
+                                    onOk: () => handleMakeUserAdmin(userData.uid),
+                                });
+                            },
+                        },
+                        {
                             key: 'deleteUser',
                             label: (
                                 <Text level="span" fontColor="danger">
@@ -118,7 +168,7 @@ export const MettleUsersTable = () => {
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
 
-    const usersColumns = useTableColumns();
+    const usersColumns = useTableColumns({ setQueryParams });
 
     return (
         <Table
