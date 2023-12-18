@@ -43,3 +43,18 @@ export const useGetUserProfile = (userUid?: string) => {
         enabled: !!userUid,
     });
 };
+
+export const useUpdateProfilePhoto = () => {
+    return useMutation({
+        mutationKey: ['update-profile-photo'],
+        mutationFn: ({ userUid, data }: { userUid: string; data: FormData }) =>
+            accountsService.put<FormData, IResponseMessage>(`/${userUid}/profile`, data),
+    });
+};
+
+export const useDeleteProfilePhoto = () => {
+    return useMutation({
+        mutationKey: ['delete-profile-photo'],
+        mutationFn: (userUid: string) => accountsService.delete<IResponseMessage>(`/${userUid}/profile`),
+    });
+};

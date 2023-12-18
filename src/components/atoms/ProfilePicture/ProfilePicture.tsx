@@ -1,9 +1,10 @@
 'use client';
 
+import { DeleteOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Avatar, Spin } from 'antd';
+import { Avatar, Spin, Button } from 'antd';
 import { Text } from 'components';
-// import { useUpdateAdminProfilePhoto } from 'hooks';
+import { useDeleteProfilePhoto, useUpdateProfilePhoto } from 'hooks';
 import { useAppContext } from 'providers';
 import React, { useRef } from 'react';
 
@@ -37,9 +38,21 @@ const ProfileAvatar = styled(Avatar)`
     }
 `;
 
-export const ProfilePicture = () => {
+const DeleteBadgeWrapper = styled.div`
+    position: relative;
+
+    .delete-profile-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 99;
+    }
+`;
+
+export const ProfilePicture = ({ src }: { src?: string | null }) => {
     const { user } = useAppContext();
-    // const uploadProfileImage = useUpdateAdminProfilePhoto();
+    const uploadProfileImage = useUpdateProfilePhoto();
+    const deleteProfileImage = useDeleteProfilePhoto();
 
     const handleProfileImageUpload = (profileImage?: File) => {
         const form = new FormData();
@@ -47,38 +60,56 @@ export const ProfilePicture = () => {
         if (profileImage) {
             form.append('profileImage', profileImage);
 
-            // uploadProfileImage.mutate(
-            //     {
-            //         businessUuid: user?.businessUuid as string,
-            //         adminUid: user?.uid as string,
-            //         data: form,
-            //     },
-            //     {
-            //         onSuccess: async () => {
-            //             window.location.reload();
-            //         },
-            //     },
-            // );
+            uploadProfileImage.mutate(
+                {
+                    userUid: user?.uid as string,
+                    data: form,
+                },
+                {
+                    onSuccess: async () => {
+                        window.location.reload();
+                    },
+                },
+            );
         }
+    };
+
+    const handleProfileImageDelete = () => {
+        deleteProfileImage.mutate(user?.uid as string, {
+            onSuccess: async () => {
+                window.location.reload();
+            },
+        });
     };
 
     const inputRef = useRef<HTMLInputElement>(null);
 
     return (
         <React.Fragment>
-            <Spin spinning={false}>
-                <ProfileAvatar
-                    className={user?.profileImageSrc ? 'with-picture' : 'no-picture'}
-                    size={250}
-                    src={user?.profileImageSrc}
-                    onClick={() => {
-                        inputRef.current?.click();
-                    }}
-                >
-                    <Text level="span" size="3rem">
-                        {user?.name?.[0]}
-                    </Text>
-                </ProfileAvatar>
+            <Spin spinning={uploadProfileImage.isPending || deleteProfileImage.isPending}>
+                <DeleteBadgeWrapper>
+                    {src === undefined && user?.profileImageSrc && (
+                        <Button
+                            className="delete-profile-btn"
+                            shape="circle"
+                            type="primary"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={handleProfileImageDelete}
+                        />
+                    )}
+                    <ProfileAvatar
+                        className={src === undefined && user?.profileImageSrc ? 'with-picture' : 'no-picture'}
+                        size={250}
+                        src={src === undefined ? user?.profileImageSrc : src}
+                        onClick={() => {
+                            inputRef.current?.click();
+                        }}
+                    >
+                        {src === undefined && <Text level="span">Adicionar foto de perfil</Text>}
+                        {src !== undefined && <Text level="span">Perfil</Text>}
+                    </ProfileAvatar>
+                </DeleteBadgeWrapper>
             </Spin>
             <input
                 ref={inputRef}
