@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Mettle Backoffice
+
+This project is a user management system for Mettle. It allows administrators to view, promote, and delete users. It's
+built with React, TypeScript, and uses Ant Design for the UI components.
 
 ## Getting Started
 
-First, run the development server:
+These instructions will get you a copy of the project up and running on your local machine for development and testing
+purposes.
+
+### Prerequisites
+
+You need to have Node.js and npm installed on your machine. You can install them
+from [here](https://nodejs.org/en/download/).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Verify installations
+node --version
+npm --version# Clone the repository
+git clone https://github.com/mettle-education-software/mettle-backoffice-fe.git
+
+# Navigate into the directory
+cd mettle-users-management
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project is ready to be deployed using a provider of your choice.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Built With
 
-## Learn More
+- React - The web framework used
+- NPM - Dependency Management
+- JavaScript - Used to write the application
+- TypeScript - Used for static typing
+- Ant Design - UI library
+- Styled Components - CSS-in-JS library
+- Tanstack - React Query
+- Axios - HTTP client
 
-To learn more about Next.js, take a look at the following resources:
+Versioning
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+We use SemVer for versioning. For the versions available, see the tags on this repository.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Authors
 
-## Deploy on Vercel
+Pedro Filipe Fontes - Mettle Education Software
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is licensed under the MIT License - see the LICENSE.md file for details
+Copy and distribution of this code is strictly prohibited.
