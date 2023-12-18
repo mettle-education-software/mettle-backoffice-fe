@@ -5,7 +5,7 @@ import { accountsService } from 'services';
 export const useMakeUserAdmin = () => {
     return useMutation({
         mutationKey: ['make-user-admin'],
-        mutationFn: (userUid: string) => accountsService.put<null, IResponseMessage>(`/accounts/${userUid}/admin`),
+        mutationFn: (userUid: string) => accountsService.put<null, IResponseMessage>(`/${userUid}/admin`),
     });
 };
 

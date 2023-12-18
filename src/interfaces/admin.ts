@@ -84,3 +84,15 @@ export interface IProductsResponse {
     data: IProduct[];
     pagination: IPagination;
 }
+
+export interface ILeaderUser {
+    currentMelpDay: number;
+    email: string;
+    performanceOverall: number;
+    score: number;
+    uid: string;
+}
+
+export interface ILeaderboardResponse {
+    data: ILeaderUser[];
+}

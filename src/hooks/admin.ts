@@ -5,6 +5,7 @@ import {
     IProductDTO,
     QueryParams,
     IMettleUsersResponse,
+    ILeaderboardResponse,
 } from 'interfaces';
 import { adminService } from 'services';
 
@@ -58,5 +59,13 @@ export const useGetMettleUsers = (params: QueryParams) => {
     return useQuery({
         queryKey: ['get-mettle-users', params],
         queryFn: () => adminService.get<IMettleUsersResponse>('/users', { params }).then(({ data }) => data),
+    });
+};
+
+export const useGetMelpLeaderboard = () => {
+    return useQuery({
+        queryKey: ['get-melp-leaderboard'],
+        queryFn: () => adminService.get<ILeaderboardResponse>('/users/leaderboard').then(({ data }) => data),
+        refetchInterval: 25 * 60 * 1000,
     });
 };
