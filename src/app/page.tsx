@@ -112,7 +112,7 @@ function Login() {
                 <FormContainer>
                     <Spin spinning={isSignInLoading}>
                         <FormHeader>
-                            <span>Acesso | Mettle Business Manager</span>
+                            <span>Acesso | Mettle Backoffice Admin</span>
                         </FormHeader>
                         <Form
                             layout="vertical"
