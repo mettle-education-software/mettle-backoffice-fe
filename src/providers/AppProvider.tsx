@@ -57,7 +57,6 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
             setIsAppLoading(true);
         });
         auth.onAuthStateChanged(handleUserTokenChange);
-        auth.onIdTokenChanged(handleUserTokenChange);
     }, []);
 
     return (
