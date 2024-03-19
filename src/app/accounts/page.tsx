@@ -1,12 +1,13 @@
 'use client';
 
-import { Button, Card, Col, Row, Tabs } from 'antd';
+import { Button, Card, Col, Input, Row, Tabs } from 'antd';
 import { Text, AppLayout, MettleUsersTable, CreateMettleUserDrawer } from 'components';
 import { withAuthentication } from 'libs';
 import React, { useState } from 'react';
 
 function Accounts() {
     const [isCreateMettleUserDrawerOpen, setIsCreateMettleUserDrawerOpen] = useState(false);
+    const [searchValue, setSearchValue] = useState<string>();
 
     return (
         <AppLayout>
@@ -47,7 +48,7 @@ function Accounts() {
                             {
                                 key: 'mettleUsers',
                                 label: 'Mettle Usuários',
-                                children: <MettleUsersTable />,
+                                children: <MettleUsersTable searchValue={searchValue} />,
                             },
                             {
                                 key: 'mettleCompanies',
@@ -62,6 +63,15 @@ function Accounts() {
                                 disabled: true,
                             },
                         ]}
+                        tabBarExtraContent={
+                            <Input.Search
+                                placeholder="Pesquisar"
+                                onSearch={(value) => {
+                                    setSearchValue(value);
+                                }}
+                                allowClear
+                            />
+                        }
                     />
                 </Col>
             </Row>

@@ -1,17 +1,18 @@
 'use client';
 
-import { Table, Modal, Input, Row, Col } from 'antd';
+import { Table, Modal } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
+import { SorterResult } from 'antd/es/table/interface';
 import { fromUnixTime } from 'date-fns';
 import { useDeleteMettleUser, useGetMettleUsers, useMakeUserAdmin } from 'hooks';
 import { IMettleUser, QueryParams } from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActionsDropdown, Text } from '../../atoms';
 
-const useTableColumns = ({ setQueryParams }: { setQueryParams: React.Dispatch<React.SetStateAction<QueryParams>> }) => {
+const useTableColumns = ({ isSearchMode }: { isSearchMode?: boolean }) => {
     const router = useRouter();
     const { showNotification } = useNotificationsContext();
     const deleteMettleUser = useDeleteMettleUser();
@@ -41,39 +42,47 @@ const useTableColumns = ({ setQueryParams }: { setQueryParams: React.Dispatch<Re
 
     const columns: ColumnsType<IMettleUser> = [
         {
-            title: (
-                <Row gutter={18} align="middle" justify="space-between">
-                    <Col>
-                        <Text level="span" fontWeight="500">
-                            E-mail
-                        </Text>
-                    </Col>
-                    <Col>
-                        <Input.Search
-                            placeholder="Pesquisar"
-                            onSearch={(value) => {
-                                setQueryParams((previous) => ({
-                                    ...previous,
-                                    q: !!value ? value : undefined,
-                                }));
-                            }}
-                            allowClear
-                        />
-                    </Col>
-                </Row>
-            ),
+            title: 'Email',
             dataIndex: 'userData',
+            key: 'email',
             render: (value) => value?.email,
+            sorter: !isSearchMode,
+            showSorterTooltip: {
+                title: 'Clique para ordenar por e-mail',
+            },
         },
         {
             title: 'Nome',
             dataIndex: 'userData',
-            render: (value) => `${value?.firstName} ${value?.lastName}`,
+            key: 'firstName',
+            render: (value) => value?.firstName,
+            sorter: !isSearchMode,
+            showSorterTooltip: {
+                title: 'Clique para ordenar por nome',
+            },
+        },
+        {
+            title: 'Sobrenome',
+            dataIndex: 'userData',
+            key: 'lastName',
+            render: (value) => value?.lastName,
+            sorter: !isSearchMode,
+            showSorterTooltip: {
+                title: 'Clique para ordenar por nome',
+            },
         },
         {
             title: 'Iniciou o DEDA',
             dataIndex: 'accountStatus',
+            key: 'isDedaStartConfirmed',
             render: (value) => (value?.dedaStart?.isDedaStartConfirmed ? 'Sim' : 'Não'),
+            filters: !isSearchMode
+                ? [
+                      { value: true, text: 'Sim' },
+                      { value: false, text: 'Não' },
+                  ]
+                : undefined,
+            filterMultiple: false,
         },
         {
             title: 'Data de criação',
@@ -86,7 +95,7 @@ const useTableColumns = ({ setQueryParams }: { setQueryParams: React.Dispatch<Re
                 }) || '-',
         },
         {
-            title: 'Data do último input',
+            title: 'Data da última atividade',
             dataIndex: 'userHistory',
             render: (userHistory) =>
                 userHistory?.lastInputDate
@@ -160,7 +169,7 @@ const useTableColumns = ({ setQueryParams }: { setQueryParams: React.Dispatch<Re
     return columns;
 };
 
-export const MettleUsersTable = () => {
+export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     const [queryParams, setQueryParams] = useState<QueryParams>({
         pageOffset: 1,
         pageSize: 10,
@@ -168,7 +177,15 @@ export const MettleUsersTable = () => {
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
 
-    const usersColumns = useTableColumns({ setQueryParams });
+    const usersColumns = useTableColumns({ isSearchMode: !!searchValue });
+
+    useEffect(() => {
+        setQueryParams((previous) => ({
+            pageOffset: 1,
+            pageSize: previous.pageSize,
+            q: !!searchValue ? searchValue : undefined,
+        }));
+    }, [searchValue]);
 
     return (
         <Table
@@ -176,6 +193,31 @@ export const MettleUsersTable = () => {
             loading={isLoading}
             dataSource={mettleUsers?.data || []}
             columns={usersColumns as ColumnsType<AnyObject>}
+            onChange={(pagination, filters, sorter) => {
+                const { isDedaStartConfirmed } = filters;
+
+                const appliedFilters: {
+                    sortBy?: string;
+                    isDedaStartConfirmed_eq?: string;
+                    pageOffset?: number;
+                    pageSize?: number;
+                } = {
+                    pageOffset: pagination.current,
+                    pageSize: pagination.pageSize,
+                };
+
+                if ((sorter as SorterResult<any>)?.columnKey) {
+                    appliedFilters.sortBy = `${(sorter as SorterResult<any>)?.columnKey}_${
+                        (sorter as SorterResult<any>)?.order === 'ascend' ? 'asc' : 'desc'
+                    }`;
+                }
+
+                if (isDedaStartConfirmed) {
+                    appliedFilters.isDedaStartConfirmed_eq = isDedaStartConfirmed.toString();
+                }
+
+                setQueryParams(appliedFilters);
+            }}
             pagination={{
                 showSizeChanger: true,
                 pageSizeOptions: ['10', '20', '30'],
