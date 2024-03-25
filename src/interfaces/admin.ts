@@ -73,6 +73,40 @@ export interface IMettleUser {
         daysSinceMelpBegin: number;
         daysSinceFirstPurchase: number;
     };
+    metadata: {
+        mailchimp: {
+            listId: string;
+            tags: string[];
+        };
+    };
+}
+
+export interface IMailchimpListsResponse {
+    lists: {
+        id: string;
+        name: string;
+    }[];
+}
+
+export interface IMailchimpListTagsResponse {
+    tags: {
+        id: number;
+        name: string;
+    }[];
+}
+
+export interface IUpdateUserDataDTO {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+}
+
+export interface IUpdateUserMailchimpTagsDTO {
+    listId: string;
+    tags: {
+        name: string;
+        status: 'active' | 'inactive';
+    }[];
 }
 
 export interface IMettleUsersResponse {

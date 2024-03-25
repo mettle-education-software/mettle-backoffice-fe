@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import {
     IBackofficeDashboardResponse,
     IProductsResponse,
@@ -6,7 +7,12 @@ import {
     QueryParams,
     IMettleUsersResponse,
     ILeaderboardResponse,
+    IMailchimpListsResponse,
+    IMailchimpListTagsResponse,
+    IUpdateUserDataDTO,
+    IUpdateUserMailchimpTagsDTO,
 } from 'interfaces';
+import { useNotificationsContext } from 'providers';
 import { adminService } from 'services';
 
 export const useGetBackofficeDashboard = () => {
@@ -67,5 +73,84 @@ export const useGetMelpLeaderboard = () => {
         queryKey: ['get-melp-leaderboard'],
         queryFn: () => adminService.get<ILeaderboardResponse>('/users/leaderboard').then(({ data }) => data),
         refetchInterval: 25 * 60 * 1000,
+    });
+};
+
+export const useGetMailchimpLists = () => {
+    return useQuery({
+        queryKey: ['get-mailchimp-lists'],
+        queryFn: () => adminService.get<IMailchimpListsResponse>('/mailchimp/lists').then(({ data }) => data),
+    });
+};
+
+export const useGetMailchimpListTags = (listId?: string) => {
+    return useQuery({
+        enabled: !!listId,
+        queryKey: ['get-mailchimp-list-tags', listId],
+        queryFn: () =>
+            adminService.get<IMailchimpListTagsResponse>(`/mailchimp/lists/${listId}/tags`).then(({ data }) => data),
+    });
+};
+
+export const useGetAllMailchimpTags = () => {
+    return useQuery({
+        queryKey: ['get-all-mailchimp-tags'],
+        queryFn: async () => {
+            const lists = await adminService.get<IMailchimpListsResponse>('/mailchimp/lists').then(({ data }) => data);
+            const allTagsResponses = await Promise.all(
+                lists.lists.map(async ({ id }) => {
+                    return await adminService.get<IMailchimpListTagsResponse>(`/mailchimp/lists/${id}/tags`);
+                }),
+            );
+            const tags = allTagsResponses.map(({ data }) => data.tags).flat();
+            return tags;
+        },
+    });
+};
+
+export const useUpdateMettleUser = () => {
+    const queryClient = useQueryClient();
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationKey: ['update-mettle-user'],
+        mutationFn: ({ userUid, payloadData }: { userUid: string; payloadData: IUpdateUserDataDTO }) =>
+            adminService.patch<IUpdateUserDataDTO, { message: string }>(`/users/${userUid}`, payloadData),
+        onSuccess: async () => {
+            showNotification('success', 'Successo!', 'Usuário atualizado com sucesso!');
+            await queryClient.invalidateQueries({
+                queryKey: ['get-mettle-users'],
+            });
+        },
+        onError: (error) => {
+            const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
+            showNotification('error', 'Erro!', errorMessage ?? 'Algo deu errado. Tente de novo mais tarde.');
+        },
+    });
+};
+
+export const useUpdateMettleUserMailchimpTags = () => {
+    const queryClient = useQueryClient();
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationKey: ['update-mettle-mailchimp-tags'],
+        mutationFn: ({ userUid, dto }: { userUid: string; dto: IUpdateUserMailchimpTagsDTO }) =>
+            adminService.patch<
+                IUpdateUserMailchimpTagsDTO,
+                {
+                    message: string;
+                }
+            >(`/users/${userUid}/mailchimp-tags`, dto),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['get-mettle-users'],
+            });
+            showNotification('success', 'Successo!', 'Tags do Mailchimp atualizadas com sucesso!');
+        },
+        onError: (error) => {
+            const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
+            showNotification('error', 'Erro!', errorMessage ?? 'Algo deu errado. Tente de novo mais tarde.');
+        },
     });
 };
