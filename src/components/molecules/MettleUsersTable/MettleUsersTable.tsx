@@ -1,18 +1,32 @@
 'use client';
 
-import { Table, Modal } from 'antd';
+import { Table, Modal, Tag, Drawer, Form, Input, Button, Select, Spin } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
 import { fromUnixTime } from 'date-fns';
-import { useDeleteMettleUser, useGetMettleUsers, useMakeUserAdmin } from 'hooks';
-import { IMettleUser, QueryParams } from 'interfaces';
+import {
+    useDeleteMettleUser,
+    useGetMailchimpLists,
+    useGetMailchimpListTags,
+    useGetMettleUsers,
+    useMakeUserAdmin,
+    useUpdateMettleUser,
+    useUpdateMettleUserMailchimpTags,
+} from 'hooks';
+import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActionsDropdown, Text } from '../../atoms';
 
-const useTableColumns = ({ isSearchMode }: { isSearchMode?: boolean }) => {
+const useTableColumns = ({
+    isSearchMode,
+    onAction,
+}: {
+    isSearchMode?: boolean;
+    onAction: (action: string, record: IMettleUser) => void;
+}) => {
     const router = useRouter();
     const { showNotification } = useNotificationsContext();
     const deleteMettleUser = useDeleteMettleUser();
@@ -85,6 +99,17 @@ const useTableColumns = ({ isSearchMode }: { isSearchMode?: boolean }) => {
             filterMultiple: false,
         },
         {
+            title: 'Tags do Mailchimp',
+            dataIndex: 'metadata',
+            key: 'mailchimpTags',
+            render: (_, { metadata }) =>
+                !metadata
+                    ? '-'
+                    : metadata?.mailchimp?.tags?.length === 0
+                      ? '-'
+                      : metadata?.mailchimp?.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>),
+        },
+        {
             title: 'Data de criação',
             dataIndex: 'accountStatus',
             render: (accountStatus) =>
@@ -109,9 +134,25 @@ const useTableColumns = ({ isSearchMode }: { isSearchMode?: boolean }) => {
         {
             key: 'tableActions',
             dataIndex: 'userData',
-            render: (userData) => (
+            render: (userData, record) => (
                 <ActionsDropdown
                     items={[
+                        {
+                            key: 'editUserData',
+                            label: 'Editar dados do usuário',
+                            onClick: ({ domEvent }) => {
+                                domEvent.preventDefault();
+                                onAction('editUserData', record);
+                            },
+                        },
+                        {
+                            key: 'editMailchimpTags',
+                            label: 'Editar tags do Mailchimp',
+                            onClick: ({ domEvent }) => {
+                                domEvent.preventDefault();
+                                onAction('editMailchimpTags', record);
+                            },
+                        },
                         {
                             key: 'viewProfile',
                             label: 'Perfil do usuário',
@@ -165,7 +206,6 @@ const useTableColumns = ({ isSearchMode }: { isSearchMode?: boolean }) => {
             ),
         },
     ];
-
     return columns;
 };
 
@@ -177,7 +217,22 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
 
-    const usersColumns = useTableColumns({ isSearchMode: !!searchValue });
+    const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+    const [isEditMailchimpTagsDrawerOpen, setIsEditMailchimpTagsDrawerOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<IMettleUser | null>(null);
+
+    const onAction = (action: string, record: IMettleUser) => {
+        if (action === 'editUserData') {
+            setSelectedUser(record);
+            setIsEditDrawerOpen(true);
+        }
+        if (action === 'editMailchimpTags') {
+            setSelectedUser(record);
+            setIsEditMailchimpTagsDrawerOpen(true);
+        }
+    };
+
+    const usersColumns = useTableColumns({ isSearchMode: !!searchValue, onAction });
 
     useEffect(() => {
         setQueryParams((previous) => ({
@@ -187,51 +242,270 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
         }));
     }, [searchValue]);
 
-    return (
-        <Table
-            rowKey={(record) => record.userData.uid}
-            loading={isLoading}
-            dataSource={mettleUsers?.data || []}
-            columns={usersColumns as ColumnsType<AnyObject>}
-            onChange={(pagination, filters, sorter) => {
-                const { isDedaStartConfirmed } = filters;
+    const [editUserForm] = Form.useForm();
+    const updateMettleUserData = useUpdateMettleUser();
 
-                const appliedFilters: {
-                    sortBy?: string;
-                    isDedaStartConfirmed_eq?: string;
-                    pageOffset?: number;
-                    pageSize?: number;
-                } = {
-                    pageOffset: pagination.current,
-                    pageSize: pagination.pageSize,
-                };
+    const handleCloseEditDrawer = () => {
+        setIsEditDrawerOpen(false);
+        setSelectedUser(null);
+        editUserForm.resetFields();
+    };
 
-                if ((sorter as SorterResult<any>)?.columnKey) {
-                    appliedFilters.sortBy = `${(sorter as SorterResult<any>)?.columnKey}_${
-                        (sorter as SorterResult<any>)?.order === 'ascend' ? 'asc' : 'desc'
-                    }`;
-                }
+    const handleEditUserFormSubmission = (values: AnyObject) => {
+        const editUserDTO: IUpdateUserDataDTO = {};
 
-                if (isDedaStartConfirmed) {
-                    appliedFilters.isDedaStartConfirmed_eq = isDedaStartConfirmed.toString();
-                }
+        if (values.firstName && values.firstName !== selectedUser?.userData?.firstName) {
+            editUserDTO.firstName = values.firstName.trim();
+        }
 
-                setQueryParams(appliedFilters);
-            }}
-            pagination={{
-                showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '30'],
-                defaultCurrent: 1,
-                total: mettleUsers?.pagination.total || 0,
-                showTotal: () => <span>Total: {mettleUsers?.pagination.total || 0}</span>,
-                onChange: (offset, pageSize) => {
-                    setQueryParams((previous) => ({
-                        ...previous,
-                        pageOffset: offset,
-                        pageSize,
-                    }));
+        if (values.lastName && values.lastName !== selectedUser?.userData?.lastName) {
+            editUserDTO.lastName = values.lastName.trim();
+        }
+
+        if (values.email && values.email !== selectedUser?.userData?.email) {
+            editUserDTO.email = values.email.trim();
+        }
+
+        if (Object.keys(editUserDTO).length === 0) {
+            handleCloseEditDrawer();
+            return;
+        }
+
+        updateMettleUserData.mutate(
+            { userUid: selectedUser?.userData?.uid as string, payloadData: editUserDTO },
+            {
+                onSuccess: () => {
+                    handleCloseEditDrawer();
                 },
-            }}
-        />
+            },
+        );
+    };
+
+    const [editMailchimpTagsForm] = Form.useForm();
+    const mailchimpListId = Form.useWatch('mailchimpListId', editMailchimpTagsForm);
+
+    const { data: mailchimpLists } = useGetMailchimpLists();
+    const { data: mailchimpTags, isLoading: isMailchimpTagsLoading } = useGetMailchimpListTags(mailchimpListId);
+
+    const handleCloseMailchimpTagsEditDrawer = () => {
+        setIsEditMailchimpTagsDrawerOpen(false);
+        setSelectedUser(null);
+        editMailchimpTagsForm.resetFields();
+    };
+
+    const updateUserMailchimpTags = useUpdateMettleUserMailchimpTags();
+
+    const handleMailchimpTagsEditSubmit = (values: AnyObject) => {
+        const currentTags = selectedUser?.metadata?.mailchimp?.tags || [];
+
+        const newTags = values.mailchimpTags.map((tag: string) => ({
+            name: tag,
+            status: 'active',
+        }));
+
+        currentTags.forEach((currentTag) => {
+            if (!newTags.find((tag: { name: string; status: string }) => tag.name === currentTag)) {
+                newTags.push({
+                    name: currentTag,
+                    status: 'inactive',
+                });
+            }
+        });
+
+        const dto: IUpdateUserMailchimpTagsDTO = {
+            listId: mailchimpListId,
+            tags: newTags,
+        };
+
+        updateUserMailchimpTags.mutate(
+            { userUid: selectedUser?.userData?.uid as string, dto },
+            {
+                onSuccess: () => {
+                    handleCloseMailchimpTagsEditDrawer();
+                },
+            },
+        );
+    };
+
+    useEffect(() => {
+        if (isEditDrawerOpen) {
+            editUserForm.setFieldsValue({
+                firstName: selectedUser?.userData?.firstName,
+                lastName: selectedUser?.userData?.lastName,
+                email: selectedUser?.userData?.email,
+            });
+        }
+    }, [isEditDrawerOpen]);
+
+    useEffect(() => {
+        if (isEditMailchimpTagsDrawerOpen) {
+            editMailchimpTagsForm.setFieldsValue({
+                mailchimpListId: selectedUser?.metadata?.mailchimp?.listId,
+                mailchimpTags: selectedUser?.metadata?.mailchimp?.tags,
+            });
+        }
+    }, [isEditMailchimpTagsDrawerOpen]);
+
+    return (
+        <>
+            <Table
+                rowKey={(record) => record.userData.uid}
+                loading={isLoading}
+                dataSource={mettleUsers?.data || []}
+                columns={usersColumns as ColumnsType<AnyObject>}
+                onChange={(pagination, filters, sorter) => {
+                    const { isDedaStartConfirmed } = filters;
+
+                    const appliedFilters: {
+                        sortBy?: string;
+                        isDedaStartConfirmed_eq?: string;
+                        pageOffset?: number;
+                        pageSize?: number;
+                    } = {
+                        pageOffset: pagination.current,
+                        pageSize: pagination.pageSize,
+                    };
+
+                    if ((sorter as SorterResult<any>)?.columnKey) {
+                        appliedFilters.sortBy = `${(sorter as SorterResult<any>)?.columnKey}_${
+                            (sorter as SorterResult<any>)?.order === 'ascend' ? 'asc' : 'desc'
+                        }`;
+                    }
+
+                    if (isDedaStartConfirmed) {
+                        appliedFilters.isDedaStartConfirmed_eq = isDedaStartConfirmed.toString();
+                    }
+
+                    setQueryParams(appliedFilters);
+                }}
+                pagination={{
+                    showSizeChanger: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    defaultCurrent: 1,
+                    total: mettleUsers?.pagination.total || 0,
+                    showTotal: () => <span>Total: {mettleUsers?.pagination.total || 0}</span>,
+                    onChange: (offset, pageSize) => {
+                        setQueryParams((previous) => ({
+                            ...previous,
+                            pageOffset: offset,
+                            pageSize,
+                        }));
+                    },
+                }}
+            />
+            <Drawer
+                onClose={handleCloseMailchimpTagsEditDrawer}
+                open={isEditMailchimpTagsDrawerOpen}
+                footer={
+                    <Button
+                        loading={updateUserMailchimpTags.isPending}
+                        type="primary"
+                        block
+                        size="large"
+                        onClick={() => {
+                            editMailchimpTagsForm.submit();
+                        }}
+                    >
+                        Salvar
+                    </Button>
+                }
+            >
+                {isEditMailchimpTagsDrawerOpen && selectedUser && (
+                    <Form form={editMailchimpTagsForm} layout="vertical" onFinish={handleMailchimpTagsEditSubmit}>
+                        <Form.Item
+                            name="mailchimpListId"
+                            label="Lista do Mailchimp"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Por favor, selecione a lista do Mailchimp',
+                                },
+                            ]}
+                        >
+                            <Select
+                                defaultValue={selectedUser?.metadata?.mailchimp?.listId}
+                                options={mailchimpLists?.lists.map(({ name, id }) => ({ label: name, value: id }))}
+                            />
+                        </Form.Item>
+                        <Form.Item name="mailchimpTags" label="Tags do usuário">
+                            <Select
+                                mode="tags"
+                                allowClear
+                                defaultValue={selectedUser?.metadata?.mailchimp?.tags}
+                                loading={isMailchimpTagsLoading}
+                                options={mailchimpTags?.tags.map((tag) => ({ label: tag.name, value: tag.name }))}
+                            />
+                        </Form.Item>
+                    </Form>
+                )}
+            </Drawer>
+            <Drawer
+                onClose={handleCloseEditDrawer}
+                open={isEditDrawerOpen}
+                title="Editar informações do usuário"
+                size="large"
+                footer={
+                    <Button
+                        loading={updateMettleUserData.isPending}
+                        type="primary"
+                        block
+                        size="large"
+                        onClick={() => {
+                            editUserForm.submit();
+                        }}
+                    >
+                        Salvar
+                    </Button>
+                }
+            >
+                {isEditDrawerOpen && selectedUser && (
+                    <Form layout="vertical" form={editUserForm} onFinish={handleEditUserFormSubmission}>
+                        <Form.Item
+                            name="firstName"
+                            label="Nome"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Por favor, insira o nome do usuário',
+                                },
+                            ]}
+                        >
+                            <Input type="text" defaultValue={selectedUser?.userData?.firstName} />
+                        </Form.Item>
+                        <Form.Item
+                            name="lastName"
+                            label="Sobrenome"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Por favor, insira o sobrenome do usuário',
+                                },
+                            ]}
+                        >
+                            <Input type="text" defaultValue={selectedUser?.userData?.lastName} />
+                        </Form.Item>
+                        <Form.Item
+                            validateDebounce={800}
+                            name="email"
+                            label="Email"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Por favor, insira o e-mail do usuário',
+                                },
+                                {
+                                    type: 'email',
+                                    message: 'Por favor, insira um e-mail válido',
+                                },
+                            ]}
+                        >
+                            <Input type="email" defaultValue={selectedUser?.userData?.email} />
+                        </Form.Item>
+                    </Form>
+                )}
+            </Drawer>
+        </>
     );
 };
+
+// TODO - Refactor this component and split functionalities
