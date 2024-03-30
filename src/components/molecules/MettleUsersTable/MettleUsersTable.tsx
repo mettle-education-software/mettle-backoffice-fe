@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Modal, Tag, Drawer, Form, Input, Button, Select, Spin } from 'antd';
+import { Table, Modal, Tag, Drawer, Form, Input, Button, Select } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
@@ -17,7 +17,7 @@ import {
 import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActionsDropdown, Text } from '../../atoms';
 
 const useTableColumns = ({
@@ -336,6 +336,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                 email: selectedUser?.userData?.email,
             });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditDrawerOpen]);
 
     useEffect(() => {
@@ -345,6 +346,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                 mailchimpTags: selectedUser?.metadata?.mailchimp?.tags,
             });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditMailchimpTagsDrawerOpen]);
 
     return (
