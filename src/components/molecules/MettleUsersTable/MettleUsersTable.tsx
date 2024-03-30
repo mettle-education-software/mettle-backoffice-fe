@@ -349,9 +349,14 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     return (
         <>
             <Table
-                rowKey={(record) => record.userData.uid}
+                rowKey={(record) => {
+                    if (!record.userData?.uid) {
+                        console.error('no-key', record);
+                    }
+                    return record?.userData?.uid ?? 'no-key';
+                }}
                 loading={isLoading}
-                dataSource={mettleUsers?.data || []}
+                dataSource={mettleUsers?.data?.filter((el) => !!el.userData) || []}
                 columns={usersColumns as ColumnsType<AnyObject>}
                 onChange={(pagination, filters, sorter) => {
                     const { isDedaStartConfirmed } = filters;
