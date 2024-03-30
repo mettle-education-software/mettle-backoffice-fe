@@ -154,6 +154,7 @@ const useTableColumns = ({
                             },
                         },
                         {
+                            disabled: true,
                             key: 'viewProfile',
                             label: 'Perfil do usuário',
                             onClick: ({ domEvent }) => {
