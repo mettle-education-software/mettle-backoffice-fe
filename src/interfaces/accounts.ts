@@ -73,6 +73,18 @@ export interface IUserHistory {
     };
 }
 
+export interface IUserPerformanceData {
+    lampStartDate: null;
+    customStats: unknown;
+    generalStats: {
+        review: 0;
+        dedaQuality: 0;
+        overall: 0;
+        active: 0;
+        passive: 0;
+    };
+}
+
 export interface IProfileData {
     notifications: INotification[];
     userData: IUserData;
@@ -80,4 +92,5 @@ export interface IProfileData {
     accountStatus: IAccountStatus;
     userHistory: IUserHistory;
     unlockedDEDAs: string[];
+    performanceData: IUserPerformanceData;
 }
