@@ -1,5 +1,5 @@
-import { auth } from 'config/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider } from 'config/firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import React from 'react';
 
 type HandleLoginType = (params: {
@@ -25,4 +25,12 @@ export const handleLogin: HandleLoginType = async ({ email, password, setLoginEr
                 setLoginErrorMessage('Oops! Parece que algo deu errado. Tente mais tarde!');
         }
     });
+};
+
+export const handleGoogleLogin = async () => {
+    try {
+        await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+        console.error(error);
+    }
 };

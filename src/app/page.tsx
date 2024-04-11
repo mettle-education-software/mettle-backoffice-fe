@@ -1,10 +1,10 @@
 'use client';
 
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Input, Form, Button, Row, Col, Spin } from 'antd';
 import { Logo, Text } from 'components';
-import { withoutAuthentication, handleLogin } from 'libs';
+import { withoutAuthentication, handleLogin, handleGoogleLogin } from 'libs';
 import Link from 'next/link';
 import React from 'react';
 
@@ -134,7 +134,7 @@ function Login() {
                                     className="input"
                                     size="large"
                                     type="email"
-                                    placeholder="exemplo@empresa.com.br"
+                                    placeholder="jack@mettle.com.br"
                                     prefix={<UserOutlined className="prefix-icon" />}
                                 />
                             </Form.Item>
@@ -160,6 +160,9 @@ function Login() {
                             {loginError && <ErrorMessage>{loginError}</ErrorMessage>}
                         </Form>
                     </Spin>
+                    <Button icon={<GoogleOutlined />} onClick={handleGoogleLogin}>
+                        Mettle Account Login
+                    </Button>
                 </FormContainer>
             </LoginContainer>
         </PageContainer>

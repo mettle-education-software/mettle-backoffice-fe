@@ -14,7 +14,13 @@ import {
     useUpdateMettleUser,
     useUpdateMettleUserMailchimpTags,
 } from 'hooks';
-import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
+import {
+    IMettleUser,
+    IUpdateUserDataDTO,
+    IUpdateUserMailchimpTagsDTO,
+    IUserPerformanceData,
+    QueryParams,
+} from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
@@ -108,6 +114,13 @@ const useTableColumns = ({
                     : metadata?.mailchimp?.tags?.length === 0
                       ? '-'
                       : metadata?.mailchimp?.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>),
+        },
+        {
+            title: 'Performance geral (%)',
+            dataIndex: 'performanceData',
+            key: 'performanceData',
+            render: (performanceData: IUserPerformanceData) =>
+                performanceData ? `${performanceData.generalStats.overall.toFixed(2)}%` : '-',
         },
         {
             title: 'Data de criação',
