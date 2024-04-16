@@ -3,6 +3,7 @@
 import { Button, Card, Col, Input, Row, Tabs } from 'antd';
 import { Text, AppLayout, MettleUsersTable, CreateMettleUserDrawer } from 'components';
 import { withAuthentication } from 'libs';
+import Image from 'next/image';
 import React, { useState } from 'react';
 
 function Accounts() {
@@ -65,6 +66,7 @@ function Accounts() {
                         ]}
                         tabBarExtraContent={
                             <Input.Search
+                                suffix={<Image src="/algolia.png" alt="algolia-search" width={20} height={20} />}
                                 placeholder="Pesquisar"
                                 onSearch={(value) => {
                                     setSearchValue(value);
