@@ -28,7 +28,18 @@ export const useDeleteMettleUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationKey: ['delete-mettle-user'],
-        mutationFn: (userUid: string) => accountsService.delete<IResponseMessage>(`/${userUid}`),
+        mutationFn: ({
+            userUid,
+            shouldSendEmailNotification,
+        }: {
+            userUid: string;
+            shouldSendEmailNotification?: boolean;
+        }) => {
+            console.log('sending data with ', { shouldNotSendEmail: !shouldSendEmailNotification });
+            return accountsService.delete<IResponseMessage, { shouldNotSendEmail: boolean }>(`/${userUid}`, {
+                data: { shouldNotSendEmail: !shouldSendEmailNotification },
+            });
+        },
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-users'],
