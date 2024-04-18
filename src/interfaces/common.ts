@@ -9,9 +9,9 @@ interface Cancel {
     message: string;
 }
 
-export type HTTPOptions = {
+export type HTTPOptions<D = unknown> = {
     params?: QueryParams;
-    data?: unknown;
+    data?: D;
     cancelToken?: {
         promise: Promise<Cancel>;
         reason?: Cancel;

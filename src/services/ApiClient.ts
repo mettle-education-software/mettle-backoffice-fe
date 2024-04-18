@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { auth } from 'config/firebase';
 import { HTTPOptions, HTTPResponse, HTTPClient } from 'interfaces';
 
@@ -63,8 +63,8 @@ class ApiClient implements HTTPClient {
         return this.client.patch<R>(endpoint, data, options);
     }
 
-    delete<T>(endpoint: string): Promise<HTTPResponse<T>> {
-        return this.client.delete<T>(endpoint);
+    delete<R, D = unknown>(endpoint: string, config?: HTTPOptions<D>): Promise<HTTPResponse<R>> {
+        return this.client.delete<R>(endpoint, config);
     }
 
     put<D, R>(endpoint: string, data?: D, options?: HTTPOptions): Promise<HTTPResponse<R>> {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Modal, Tag, Drawer, Form, Input, Button, Select } from 'antd';
+import { Table, Modal, Tag, Drawer, Form, Input, Button, Select, Flex, Typography } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
@@ -26,13 +26,12 @@ import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
 import { ActionsDropdown, Text } from '../../atoms';
 
-const useTableColumns = ({
-    isSearchMode,
-    onAction,
-}: {
+interface UseTableColumnsProps {
     isSearchMode?: boolean;
     onAction: (action: string, record: IMettleUser) => void;
-}) => {
+}
+
+const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
     const router = useRouter();
     const { showNotification } = useNotificationsContext();
     const deleteMettleUser = useDeleteMettleUser();
@@ -49,15 +48,18 @@ const useTableColumns = ({
         });
     };
 
-    const handleDeleteUser = (userUid: string) => {
-        deleteMettleUser.mutate(userUid, {
-            onSuccess: () => {
-                showNotification('success', 'Successo', 'Usuário removido com sucesso');
+    const handleDeleteUser = (userUid: string, shouldSendEmailNotification: boolean) => {
+        deleteMettleUser.mutate(
+            { userUid, shouldSendEmailNotification },
+            {
+                onSuccess: () => {
+                    showNotification('success', 'Successo', 'Usuário removido com sucesso');
+                },
+                onError: (error) => {
+                    showNotification('error', 'Erro', error.message || 'Algo deu errado. Tente novamente mais tarde.');
+                },
             },
-            onError: (error) => {
-                showNotification('error', 'Erro', error.message || 'Algo deu errado. Tente novamente mais tarde.');
-            },
-        });
+        );
     };
 
     const columns: ColumnsType<IMettleUser> = [
@@ -202,16 +204,39 @@ const useTableColumns = ({
                             ),
                             onClick: ({ domEvent }) => {
                                 domEvent.preventDefault();
+
+                                let shouldSendEmail = true;
+
                                 Modal.confirm({
                                     title: 'Remover usuário',
-                                    content:
-                                        'Você tem certeza que deseja remover este usuário? Esta ação não poderá ser revertida.',
+                                    content: (
+                                        <Flex vertical style={{ paddingBottom: '1rem' }} gap={16}>
+                                            <Typography.Text strong>
+                                                Você tem certeza que deseja remover este usuário? Esta ação não poderá
+                                                ser revertida.
+                                            </Typography.Text>
+
+                                            <Typography.Text strong>
+                                                Atenção! Deseja enviar e-mail de despedida?
+                                            </Typography.Text>
+                                            <Select
+                                                options={[
+                                                    { label: 'Sim', value: true },
+                                                    { label: 'Não', value: false },
+                                                ]}
+                                                defaultValue={shouldSendEmail}
+                                                onChange={(value) => {
+                                                    shouldSendEmail = value;
+                                                }}
+                                            />
+                                        </Flex>
+                                    ),
                                     okText: 'Sim',
                                     okButtonProps: {
                                         danger: true,
                                     },
                                     cancelText: 'Não',
-                                    onOk: () => handleDeleteUser(userData.uid),
+                                    onOk: () => handleDeleteUser(userData.uid, shouldSendEmail),
                                 });
                             },
                         },
