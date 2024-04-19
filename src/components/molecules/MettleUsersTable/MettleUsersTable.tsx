@@ -221,8 +221,8 @@ const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
                                             </Typography.Text>
                                             <Select
                                                 options={[
-                                                    { label: 'Sim', value: true },
-                                                    { label: 'Não', value: false },
+                                                    { label: 'Sim, enviar', value: true },
+                                                    { label: 'Não enviar', value: false },
                                                 ]}
                                                 defaultValue={shouldSendEmail}
                                                 onChange={(value) => {
@@ -231,11 +231,11 @@ const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
                                             />
                                         </Flex>
                                     ),
-                                    okText: 'Sim',
+                                    okText: 'Remover usuário',
                                     okButtonProps: {
                                         danger: true,
                                     },
-                                    cancelText: 'Não',
+                                    cancelText: 'Manter usuário',
                                     onOk: () => handleDeleteUser(userData.uid, shouldSendEmail),
                                 });
                             },
