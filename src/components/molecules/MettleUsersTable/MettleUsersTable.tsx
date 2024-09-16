@@ -135,6 +135,12 @@ const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
                 }) || '-',
         },
         {
+            title: 'Data do último login',
+            dataIndex: 'lastSignInTime',
+            key: 'lastSignInTime',
+            render: (value) => (value === 'Não fez login' ? value : new Date(value).toLocaleDateString()),
+        },
+        {
             title: 'Data da última atividade',
             dataIndex: 'userHistory',
             render: (userHistory) =>

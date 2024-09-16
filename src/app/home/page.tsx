@@ -147,9 +147,7 @@ function Home() {
                         </Row>
                     </Col>
 
-                    <Col span={8}>
-                        <MelpLeaderboard />
-                    </Col>
+                    <Col span={8}>{/*<MelpLeaderboard />*/}</Col>
                 </Row>
             </Spin>
             <CreateProductDrawer open={isCreateProductDrawerOpen} onClose={() => setIsCreateProductDrawerOpen(false)} />

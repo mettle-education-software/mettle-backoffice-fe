@@ -79,6 +79,7 @@ export interface IMettleUser {
             tags: string[];
         };
     };
+    lastSignInTime: string;
 }
 
 export interface IMailchimpListsResponse {
