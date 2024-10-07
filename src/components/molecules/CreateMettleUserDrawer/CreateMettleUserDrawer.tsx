@@ -22,13 +22,11 @@ export const CreateMettleUserDrawer: React.FC<CreateMettleUserDrawerProps> = ({ 
 
     const handleCreateSubmission = (values: any) => {
         const payload: ICreateMettleUserDTO = {
-            userData: {
-                email: values.email,
-                firstName: values.firstName,
-                lastName: values.lastName,
-            },
+            email: values.email,
+            firstName: values.firstName,
+            lastName: values.lastName,
             purchaseDate: values.purchaseDate.format('YYYY-MM-DD'),
-            purchaseProductsIds: values.purchaseProductsIds,
+            isFreemium: false,
         };
 
         createMettleUser.mutate(payload, {

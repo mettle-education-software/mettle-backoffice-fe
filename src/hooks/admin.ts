@@ -64,7 +64,7 @@ export const useDeleteMettleProduct = () => {
 export const useGetMettleUsers = (params: QueryParams) => {
     return useQuery({
         queryKey: ['get-mettle-users', params],
-        queryFn: () => adminService.get<IMettleUsersResponse>('/users', { params }).then(({ data }) => data),
+        queryFn: () => adminService.get<IMettleUsersResponse>('/v2/users', { params }).then(({ data }) => data),
     });
 };
 

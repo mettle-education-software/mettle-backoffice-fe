@@ -1,11 +1,10 @@
 export interface ICreateMettleUserDTO {
-    userData: {
-        email: string;
-        firstName: string;
-        lastName: string;
-    };
+    email: string;
+    firstName: string;
+    lastName: string;
     purchaseDate: string;
-    purchaseProductsIds: string[];
+    isFreemium: boolean;
+    // purchaseProductsIds: string[];
 }
 
 export interface INotification {

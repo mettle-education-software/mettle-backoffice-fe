@@ -15,7 +15,7 @@ export const useCreateMettleUser = () => {
     return useMutation({
         mutationKey: ['create-mettle-user'],
         mutationFn: (data: ICreateMettleUserDTO) =>
-            accountsService.post<ICreateMettleUserDTO, IResponseMessage>('/', data),
+            accountsService.post<ICreateMettleUserDTO, IResponseMessage>('/v2', data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-users'],
@@ -36,7 +36,7 @@ export const useDeleteMettleUser = () => {
             shouldSendEmailNotification?: boolean;
         }) => {
             console.log('sending data with ', { shouldNotSendEmail: !shouldSendEmailNotification });
-            return accountsService.delete<IResponseMessage, { shouldNotSendEmail: boolean }>(`/${userUid}`, {
+            return accountsService.delete<IResponseMessage, { shouldNotSendEmail: boolean }>(`/v2/${userUid}`, {
                 data: { shouldNotSendEmail: !shouldSendEmailNotification },
             });
         },

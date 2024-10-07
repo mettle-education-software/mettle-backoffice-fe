@@ -1,263 +1,24 @@
 'use client';
 
-import { Table, Modal, Tag, Drawer, Form, Input, Button, Select, Flex, Typography } from 'antd';
+import { Table, Drawer, Form, Input, Button, Select } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
-import { fromUnixTime } from 'date-fns';
 import {
-    useDeleteMettleUser,
     useGetMailchimpLists,
     useGetMailchimpListTags,
     useGetMettleUsers,
-    useMakeUserAdmin,
     useUpdateMettleUser,
     useUpdateMettleUserMailchimpTags,
 } from 'hooks';
-import {
-    IMettleUser,
-    IUpdateUserDataDTO,
-    IUpdateUserMailchimpTagsDTO,
-    IUserPerformanceData,
-    QueryParams,
-} from 'interfaces';
-import { useRouter } from 'next/navigation';
-import { useNotificationsContext } from 'providers';
+import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
 import React, { useEffect, useState } from 'react';
-import { ActionsDropdown, Text } from '../../atoms';
-
-interface UseTableColumnsProps {
-    isSearchMode?: boolean;
-    onAction: (action: string, record: IMettleUser) => void;
-}
-
-const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
-    const router = useRouter();
-    const { showNotification } = useNotificationsContext();
-    const deleteMettleUser = useDeleteMettleUser();
-    const makeUserAdmin = useMakeUserAdmin();
-
-    const handleMakeUserAdmin = (userUid: string) => {
-        makeUserAdmin.mutate(userUid, {
-            onSuccess: () => {
-                showNotification('success', 'Successo', 'Usuário promovido com sucesso');
-            },
-            onError: (error) => {
-                showNotification('error', 'Erro', error.message || 'Algo deu errado. Tente novamente mais tarde.');
-            },
-        });
-    };
-
-    const handleDeleteUser = (userUid: string, shouldSendEmailNotification: boolean) => {
-        deleteMettleUser.mutate(
-            { userUid, shouldSendEmailNotification },
-            {
-                onSuccess: () => {
-                    showNotification('success', 'Successo', 'Usuário removido com sucesso');
-                },
-                onError: (error) => {
-                    showNotification('error', 'Erro', error.message || 'Algo deu errado. Tente novamente mais tarde.');
-                },
-            },
-        );
-    };
-
-    const columns: ColumnsType<IMettleUser> = [
-        {
-            title: 'Email',
-            dataIndex: 'userData',
-            key: 'email',
-            render: (value) => value?.email,
-            sorter: !isSearchMode,
-            showSorterTooltip: {
-                title: 'Clique para ordenar por e-mail',
-            },
-        },
-        {
-            title: 'Nome',
-            dataIndex: 'userData',
-            key: 'firstName',
-            render: (value) => value?.firstName,
-            sorter: !isSearchMode,
-            showSorterTooltip: {
-                title: 'Clique para ordenar por nome',
-            },
-        },
-        {
-            title: 'Sobrenome',
-            dataIndex: 'userData',
-            key: 'lastName',
-            render: (value) => value?.lastName,
-            sorter: !isSearchMode,
-            showSorterTooltip: {
-                title: 'Clique para ordenar por nome',
-            },
-        },
-        {
-            title: 'Iniciou o DEDA',
-            dataIndex: 'accountStatus',
-            key: 'isDedaStartConfirmed',
-            render: (value) => (value?.dedaStart?.isDedaStartConfirmed ? 'Sim' : 'Não'),
-            filters: !isSearchMode
-                ? [
-                      { value: true, text: 'Sim' },
-                      { value: false, text: 'Não' },
-                  ]
-                : undefined,
-            filterMultiple: false,
-        },
-        {
-            title: 'Tags do Mailchimp',
-            dataIndex: 'metadata',
-            key: 'mailchimpTags',
-            render: (_, { metadata }) =>
-                !metadata
-                    ? '-'
-                    : metadata?.mailchimp?.tags?.length === 0
-                      ? '-'
-                      : metadata?.mailchimp?.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>),
-        },
-        {
-            title: 'Performance geral (%)',
-            dataIndex: 'performanceData',
-            key: 'performanceData',
-            render: (performanceData: IUserPerformanceData) =>
-                performanceData ? `${performanceData.generalStats.overall.toFixed(2)}%` : '-',
-        },
-        {
-            title: 'Data de criação',
-            dataIndex: 'accountStatus',
-            render: (accountStatus) =>
-                fromUnixTime(accountStatus.purchaseDate._seconds)?.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                }) || '-',
-        },
-        {
-            title: 'Data do último login',
-            dataIndex: 'lastSignInTime',
-            key: 'lastSignInTime',
-            render: (value) => (value === 'Não fez login' ? value : new Date(value).toLocaleDateString()),
-        },
-        {
-            title: 'Data da última atividade',
-            dataIndex: 'userHistory',
-            render: (userHistory) =>
-                userHistory?.lastInputDate
-                    ? fromUnixTime(userHistory?.lastInputDate._seconds)?.toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                      })
-                    : '-',
-        },
-        {
-            key: 'tableActions',
-            dataIndex: 'userData',
-            render: (userData, record) => (
-                <ActionsDropdown
-                    items={[
-                        {
-                            key: 'editUserData',
-                            label: 'Editar dados do usuário',
-                            onClick: ({ domEvent }) => {
-                                domEvent.preventDefault();
-                                onAction('editUserData', record);
-                            },
-                        },
-                        {
-                            key: 'editMailchimpTags',
-                            label: 'Editar tags do Mailchimp',
-                            onClick: ({ domEvent }) => {
-                                domEvent.preventDefault();
-                                onAction('editMailchimpTags', record);
-                            },
-                        },
-                        {
-                            disabled: true,
-                            key: 'viewProfile',
-                            label: 'Perfil do usuário',
-                            onClick: ({ domEvent }) => {
-                                domEvent.preventDefault();
-                                router.push(`/profile/${userData.uid}`);
-                            },
-                        },
-                        {
-                            key: 'makeAdmin',
-                            label: 'Tornar administrador da Mettle',
-                            onClick: ({ domEvent }) => {
-                                domEvent.preventDefault();
-                                Modal.confirm({
-                                    title: 'Tornar usuário administrador',
-                                    content:
-                                        'Este usuário terá permissões de administrador e poderá acessar o Backoffice. Deseja continuar?',
-                                    okText: 'Sim',
-                                    okButtonProps: {
-                                        type: 'primary',
-                                    },
-                                    cancelText: 'Não',
-                                    onOk: () => handleMakeUserAdmin(userData.uid),
-                                });
-                            },
-                        },
-                        {
-                            key: 'deleteUser',
-                            label: (
-                                <Text level="span" fontColor="danger">
-                                    Remover usuário
-                                </Text>
-                            ),
-                            onClick: ({ domEvent }) => {
-                                domEvent.preventDefault();
-
-                                let shouldSendEmail = true;
-
-                                Modal.confirm({
-                                    title: 'Remover usuário',
-                                    content: (
-                                        <Flex vertical style={{ paddingBottom: '1rem' }} gap={16}>
-                                            <Typography.Text strong>
-                                                Você tem certeza que deseja remover este usuário? Esta ação não poderá
-                                                ser revertida.
-                                            </Typography.Text>
-
-                                            <Typography.Text strong>
-                                                Atenção! Deseja enviar e-mail de despedida?
-                                            </Typography.Text>
-                                            <Select
-                                                options={[
-                                                    { label: 'Sim, enviar', value: true },
-                                                    { label: 'Não enviar', value: false },
-                                                ]}
-                                                defaultValue={shouldSendEmail}
-                                                onChange={(value) => {
-                                                    shouldSendEmail = value;
-                                                }}
-                                            />
-                                        </Flex>
-                                    ),
-                                    okText: 'Remover usuário',
-                                    okButtonProps: {
-                                        danger: true,
-                                    },
-                                    cancelText: 'Manter usuário',
-                                    onOk: () => handleDeleteUser(userData.uid, shouldSendEmail),
-                                });
-                            },
-                        },
-                    ]}
-                />
-            ),
-        },
-    ];
-    return columns;
-};
+import { useTableColumns } from './usersTableColumns';
 
 export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     const [queryParams, setQueryParams] = useState<QueryParams>({
-        pageOffset: 1,
-        pageSize: 10,
+        offset: 0,
+        limit: 10,
     });
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
@@ -279,13 +40,13 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
 
     const usersColumns = useTableColumns({ isSearchMode: !!searchValue, onAction });
 
-    useEffect(() => {
-        setQueryParams((previous) => ({
-            pageOffset: 1,
-            pageSize: previous.pageSize,
-            q: !!searchValue ? searchValue : undefined,
-        }));
-    }, [searchValue]);
+    // useEffect(() => {
+    //     setQueryParams((previous) => ({
+    //         offset: 0,
+    //         limit: previous.limit,
+    //         q: !!searchValue ? searchValue : undefined,
+    //     }));
+    // }, [searchValue]);
 
     const [editUserForm] = Form.useForm();
     const updateMettleUserData = useUpdateMettleUser();
@@ -299,15 +60,15 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     const handleEditUserFormSubmission = (values: AnyObject) => {
         const editUserDTO: IUpdateUserDataDTO = {};
 
-        if (values.firstName && values.firstName !== selectedUser?.userData?.firstName) {
+        if (values.firstName && values.firstName !== selectedUser?.first_name) {
             editUserDTO.firstName = values.firstName.trim();
         }
 
-        if (values.lastName && values.lastName !== selectedUser?.userData?.lastName) {
+        if (values.lastName && values.lastName !== selectedUser?.last_name) {
             editUserDTO.lastName = values.lastName.trim();
         }
 
-        if (values.email && values.email !== selectedUser?.userData?.email) {
+        if (values.email && values.email !== selectedUser?.email) {
             editUserDTO.email = values.email.trim();
         }
 
@@ -317,7 +78,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
         }
 
         updateMettleUserData.mutate(
-            { userUid: selectedUser?.userData?.uid as string, payloadData: editUserDTO },
+            { userUid: selectedUser?.user_uid as string, payloadData: editUserDTO },
             {
                 onSuccess: () => {
                     handleCloseEditDrawer();
@@ -341,7 +102,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     const updateUserMailchimpTags = useUpdateMettleUserMailchimpTags();
 
     const handleMailchimpTagsEditSubmit = (values: AnyObject) => {
-        const currentTags = selectedUser?.metadata?.mailchimp?.tags || [];
+        const currentTags = selectedUser?.mailchimp_metadata?.tags || [];
 
         const newTags = values.mailchimpTags.map((tag: string) => ({
             name: tag,
@@ -363,7 +124,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
         };
 
         updateUserMailchimpTags.mutate(
-            { userUid: selectedUser?.userData?.uid as string, dto },
+            { userUid: selectedUser?.user_uid as string, dto },
             {
                 onSuccess: () => {
                     handleCloseMailchimpTagsEditDrawer();
@@ -375,9 +136,9 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     useEffect(() => {
         if (isEditDrawerOpen) {
             editUserForm.setFieldsValue({
-                firstName: selectedUser?.userData?.firstName,
-                lastName: selectedUser?.userData?.lastName,
-                email: selectedUser?.userData?.email,
+                firstName: selectedUser?.first_name,
+                lastName: selectedUser?.last_name,
+                email: selectedUser?.email,
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -386,8 +147,8 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     useEffect(() => {
         if (isEditMailchimpTagsDrawerOpen) {
             editMailchimpTagsForm.setFieldsValue({
-                mailchimpListId: selectedUser?.metadata?.mailchimp?.listId,
-                mailchimpTags: selectedUser?.metadata?.mailchimp?.tags,
+                mailchimpListId: selectedUser?.mailchimp_metadata?.listId,
+                mailchimpTags: selectedUser?.mailchimp_metadata?.tags,
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -397,35 +158,31 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
         <>
             <Table
                 rowKey={(record) => {
-                    if (!record.userData?.uid) {
+                    if (!record?.user_uid) {
                         console.error('no-key', record);
                     }
-                    return record?.userData?.uid ?? 'no-key';
+                    return record?.user_uid ?? 'no-key';
                 }}
                 loading={isLoading}
-                dataSource={mettleUsers?.data?.filter((el) => !!el.userData) || []}
+                dataSource={mettleUsers?.data || []}
                 columns={usersColumns as ColumnsType<AnyObject>}
-                onChange={(pagination, filters, sorter) => {
-                    const { isDedaStartConfirmed } = filters;
-
+                onChange={(pagination, _, sorter) => {
                     const appliedFilters: {
-                        sortBy?: string;
-                        isDedaStartConfirmed_eq?: string;
-                        pageOffset?: number;
-                        pageSize?: number;
+                        orderBy?: string;
+                        offset?: number;
+                        limit?: number;
                     } = {
-                        pageOffset: pagination.current,
-                        pageSize: pagination.pageSize,
+                        offset:
+                            !!pagination?.pageSize && !!pagination?.current
+                                ? pagination?.current * pagination?.pageSize - pagination?.pageSize
+                                : 0,
+                        limit: pagination.pageSize,
                     };
 
                     if ((sorter as SorterResult<any>)?.columnKey) {
-                        appliedFilters.sortBy = `${(sorter as SorterResult<any>)?.columnKey}_${
-                            (sorter as SorterResult<any>)?.order === 'ascend' ? 'asc' : 'desc'
+                        appliedFilters.orderBy = `${(sorter as SorterResult<any>)?.columnKey}.${
+                            (sorter as SorterResult<any>)?.order === 'ascend' ? 'ASC' : 'DESC'
                         }`;
-                    }
-
-                    if (isDedaStartConfirmed) {
-                        appliedFilters.isDedaStartConfirmed_eq = isDedaStartConfirmed.toString();
                     }
 
                     setQueryParams(appliedFilters);
@@ -439,8 +196,8 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                     onChange: (offset, pageSize) => {
                         setQueryParams((previous) => ({
                             ...previous,
-                            pageOffset: offset,
-                            pageSize,
+                            offset: offset * pageSize - pageSize,
+                            limit: pageSize,
                         }));
                     },
                 }}
@@ -475,7 +232,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                             ]}
                         >
                             <Select
-                                defaultValue={selectedUser?.metadata?.mailchimp?.listId}
+                                defaultValue={selectedUser?.mailchimp_metadata?.listId}
                                 options={mailchimpLists?.lists.map(({ name, id }) => ({ label: name, value: id }))}
                             />
                         </Form.Item>
@@ -483,7 +240,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                             <Select
                                 mode="tags"
                                 allowClear
-                                defaultValue={selectedUser?.metadata?.mailchimp?.tags}
+                                defaultValue={selectedUser?.mailchimp_metadata?.tags}
                                 loading={isMailchimpTagsLoading}
                                 options={mailchimpTags?.tags.map((tag) => ({ label: tag.name, value: tag.name }))}
                             />
@@ -522,7 +279,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                                 },
                             ]}
                         >
-                            <Input type="text" defaultValue={selectedUser?.userData?.firstName} />
+                            <Input type="text" defaultValue={selectedUser?.first_name} />
                         </Form.Item>
                         <Form.Item
                             name="lastName"
@@ -534,7 +291,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                                 },
                             ]}
                         >
-                            <Input type="text" defaultValue={selectedUser?.userData?.lastName} />
+                            <Input type="text" defaultValue={selectedUser?.first_name} />
                         </Form.Item>
                         <Form.Item
                             validateDebounce={800}
@@ -551,7 +308,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                                 },
                             ]}
                         >
-                            <Input type="email" defaultValue={selectedUser?.userData?.email} />
+                            <Input type="email" defaultValue={selectedUser?.email} />
                         </Form.Item>
                     </Form>
                 )}
