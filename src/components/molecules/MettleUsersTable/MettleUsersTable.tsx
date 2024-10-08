@@ -40,13 +40,13 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
 
     const usersColumns = useTableColumns({ isSearchMode: !!searchValue, onAction });
 
-    // useEffect(() => {
-    //     setQueryParams((previous) => ({
-    //         offset: 0,
-    //         limit: previous.limit,
-    //         q: !!searchValue ? searchValue : undefined,
-    //     }));
-    // }, [searchValue]);
+    useEffect(() => {
+        setQueryParams((previous) => ({
+            offset: 0,
+            limit: previous.limit,
+            searchQuery: !!searchValue ? searchValue : undefined,
+        }));
+    }, [searchValue]);
 
     const [editUserForm] = Form.useForm();
     const updateMettleUserData = useUpdateMettleUser();

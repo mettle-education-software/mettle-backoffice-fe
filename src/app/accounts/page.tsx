@@ -66,8 +66,6 @@ function Accounts() {
                         ]}
                         tabBarExtraContent={
                             <Input.Search
-                                disabled
-                                suffix={<Image src="/algolia.png" alt="algolia-search" width={20} height={20} />}
                                 placeholder="Pesquisar"
                                 onSearch={(value) => {
                                     setSearchValue(value);
