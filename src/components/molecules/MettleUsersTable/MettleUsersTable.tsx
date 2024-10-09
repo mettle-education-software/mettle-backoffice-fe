@@ -14,6 +14,7 @@ import {
 import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
+import styles from './MettleUsersTable.module.css';
 import { useTableColumns } from './usersTableColumns';
 
 export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
@@ -165,6 +166,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
     return (
         <>
             <Table
+                rowClassName={styles.row}
                 rowKey={(record) => {
                     if (!record?.user_uid) {
                         console.error('no-key', record);
