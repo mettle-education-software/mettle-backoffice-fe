@@ -2,7 +2,7 @@ import { Flex, Modal, Select, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { ActionsDropdown, Text } from 'components';
 import { useDeleteMettleUser, useMakeUserAdmin } from 'hooks';
-import { IMettleUser, IUserPerformanceData, MelpStatus, MelpStatusEnum } from 'interfaces';
+import { IMettleUser, MelpStatus, MelpStatusEnum } from 'interfaces';
 import { useRouter } from 'next/navigation';
 import { useNotificationsContext } from 'providers';
 import React from 'react';
@@ -126,6 +126,7 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             render: (user_uid, record) =>
                 record.status === 'ARCHIVED' ? null : (
                     <ActionsDropdown
+                        onClick={(e) => e.stopPropagation()}
                         items={[
                             {
                                 key: 'editUserData',

@@ -18,12 +18,22 @@ const IconWrapper = styled.div`
     }
 `;
 
-export const ActionsDropdown = ({ className, items }: { items: MenuProps['items']; className?: string }) => {
+export const ActionsDropdown = ({
+    className,
+    items,
+    onClick,
+}: {
+    items: MenuProps['items'];
+    className?: string;
+    onClick?: React.MouseEventHandler<HTMLDivElement>;
+}) => {
     return (
-        <Dropdown className={className} menu={{ items }} trigger={['click']}>
-            <IconWrapper>
-                <MoreOutlined className="icon" />
-            </IconWrapper>
-        </Dropdown>
+        <div onClick={onClick}>
+            <Dropdown className={className} menu={{ items }} trigger={['click']}>
+                <IconWrapper>
+                    <MoreOutlined className="icon" />
+                </IconWrapper>
+            </Dropdown>
+        </div>
     );
 };

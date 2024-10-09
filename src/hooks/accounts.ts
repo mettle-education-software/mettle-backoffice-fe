@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { ICreateMettleUserDTO, IProfileData, IResponseMessage } from 'interfaces';
+import { useNotificationsContext } from 'providers';
 import { accountsService } from 'services';
 
 export const useMakeUserAdmin = () => {
@@ -98,6 +99,33 @@ export const useUpdateUserEmail = () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-user-details'],
             });
+        },
+    });
+};
+
+export const useImpersonate = () => {
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationFn: (userUid: string) => accountsService.post(`/impersonate/add/${userUid}`),
+        onSuccess: () => {
+            showNotification('success', 'Usuário alterado!', 'Acessando como outro usuário.');
+            window.location.reload();
+        },
+        onError: (error) => {
+            showNotification('error', 'Erro', error.message || 'Algo deu errado');
+        },
+    });
+};
+
+export const useStopImpersonating = () => {
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationFn: () => accountsService.post('/impersonate/remove'),
+        onSuccess: () => {
+            showNotification('success', 'Usuário alterado!', 'Voltando ao seu usuário.');
+            window.location.reload();
         },
     });
 };

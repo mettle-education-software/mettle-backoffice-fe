@@ -12,6 +12,7 @@ import {
     useUpdateMettleUserMailchimpTags,
 } from 'hooks';
 import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
+import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
 import { useTableColumns } from './usersTableColumns';
 
@@ -154,6 +155,13 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditMailchimpTagsDrawerOpen]);
 
+    const { showNotification } = useNotificationsContext();
+
+    const copyUserUid = async (userUid: string) => {
+        await navigator.clipboard.writeText(userUid);
+        showNotification('success', 'Sucesso!', 'ID do usuário copiado para a área de transferência');
+    };
+
     return (
         <>
             <Table
@@ -163,6 +171,17 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                     }
                     return record?.user_uid ?? 'no-key';
                 }}
+                onRow={(record) => ({
+                    onClick: () => {
+                        copyUserUid(record?.user_uid as string).catch((error) => {
+                            showNotification(
+                                'error',
+                                'Erro!',
+                                error.message || 'Algo deu errado. Tente novamente mais tarde.',
+                            );
+                        });
+                    },
+                })}
                 loading={isLoading}
                 dataSource={mettleUsers?.data || []}
                 columns={usersColumns as ColumnsType<AnyObject>}
