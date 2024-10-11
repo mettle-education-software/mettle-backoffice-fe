@@ -3,7 +3,6 @@
 import { Button, Card, Col, Input, Row, Tabs } from 'antd';
 import { Text, AppLayout, MettleUsersTable, CreateMettleUserDrawer } from 'components';
 import { withAuthentication } from 'libs';
-import Image from 'next/image';
 import React, { useState } from 'react';
 
 function Accounts() {
@@ -44,12 +43,20 @@ function Accounts() {
 
                 <Col span={24}>
                     <Tabs
+                        onChange={() => {
+                            setSearchValue(undefined);
+                        }}
                         defaultActiveKey="mettleUsers"
                         items={[
                             {
                                 key: 'mettleUsers',
                                 label: 'Mettle Usuários',
                                 children: <MettleUsersTable searchValue={searchValue} />,
+                            },
+                            {
+                                key: 'mettleArchivedUsers',
+                                label: 'Usuários arquivados',
+                                children: <MettleUsersTable searchValue={searchValue} isArchived />,
                             },
                             {
                                 key: 'mettleCompanies',

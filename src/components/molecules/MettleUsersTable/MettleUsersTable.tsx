@@ -17,11 +17,22 @@ import React, { useEffect, useState } from 'react';
 import styles from './MettleUsersTable.module.css';
 import { useTableColumns } from './usersTableColumns';
 
-export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
-    const [queryParams, setQueryParams] = useState<QueryParams>({
+export const MettleUsersTable = ({
+    searchValue,
+    isArchived = false,
+}: {
+    searchValue?: string;
+    isArchived?: boolean;
+}) => {
+    const defaultParams: QueryParams = {
         offset: 0,
         limit: 10,
-    });
+    };
+
+    if (isArchived) defaultParams.accountStatusIn = 'ARCHIVED';
+    else defaultParams.accountStatusNotIn = 'ARCHIVED';
+
+    const [queryParams, setQueryParams] = useState<QueryParams>(defaultParams);
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
 
@@ -44,7 +55,7 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
 
     useEffect(() => {
         setQueryParams((previous) => ({
-            offset: 0,
+            ...defaultParams,
             limit: previous.limit,
             searchQuery: !!searchValue ? searchValue : undefined,
         }));
@@ -206,7 +217,10 @@ export const MettleUsersTable = ({ searchValue }: { searchValue?: string }) => {
                         }`;
                     }
 
-                    setQueryParams(appliedFilters);
+                    setQueryParams({
+                        ...defaultParams,
+                        ...appliedFilters,
+                    });
                 }}
                 pagination={{
                     showSizeChanger: true,
