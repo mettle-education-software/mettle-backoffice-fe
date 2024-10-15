@@ -26,7 +26,6 @@ export const CreateMettleUserDrawer: React.FC<CreateMettleUserDrawerProps> = ({ 
             firstName: values.firstName,
             lastName: values.lastName,
             purchaseDate: values.purchaseDate.format('YYYY-MM-DD'),
-            isFreemium: false,
         };
 
         createMettleUser.mutate(payload, {

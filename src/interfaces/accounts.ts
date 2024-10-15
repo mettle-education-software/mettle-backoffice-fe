@@ -3,8 +3,6 @@ export interface ICreateMettleUserDTO {
     firstName: string;
     lastName: string;
     purchaseDate: string;
-    isFreemium: boolean;
-    // purchaseProductsIds: string[];
 }
 
 export interface INotification {
