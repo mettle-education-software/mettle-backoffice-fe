@@ -29,8 +29,6 @@ export const CreateMettleUserDrawer: React.FC<CreateMettleUserDrawerProps> = ({ 
             purchasedProducts: values.purchasedProducts,
         };
 
-        console.log('payload', payload);
-
         createMettleUser.mutate(payload, {
             onSuccess: () => {
                 handleClose();
