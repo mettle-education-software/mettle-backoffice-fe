@@ -26,7 +26,10 @@ export const CreateMettleUserDrawer: React.FC<CreateMettleUserDrawerProps> = ({ 
             firstName: values.firstName,
             lastName: values.lastName,
             purchaseDate: values.purchaseDate.format('YYYY-MM-DD'),
+            purchasedProducts: values.purchasedProducts,
         };
+
+        console.log('payload', payload);
 
         createMettleUser.mutate(payload, {
             onSuccess: () => {
@@ -68,10 +71,14 @@ export const CreateMettleUserDrawer: React.FC<CreateMettleUserDrawerProps> = ({ 
                             disabledDate={(current) => current && current.toDate().getTime() > new Date().getTime()}
                         />
                     </Form.Item>
-                    <Form.Item name="purchaseProductsIds" label="Planos aplicados" rules={[requiredRule]}>
+                    <Form.Item
+                        name="purchasedProducts"
+                        label="Produtos liberados para o usuário"
+                        rules={[requiredRule]}
+                    >
                         <Select mode="multiple" placeholder="Selecione os produtos">
                             {productsShortList?.map((product) => (
-                                <Select.Option key={product.productUuid} value={product.productUuid}>
+                                <Select.Option key={product.productUuid} value={product.productId}>
                                     {product.productName}
                                 </Select.Option>
                             ))}
