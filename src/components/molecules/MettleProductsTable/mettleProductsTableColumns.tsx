@@ -1,0 +1,81 @@
+'use client';
+
+import { Typography } from 'antd';
+import { ColumnsType } from 'antd/es/table';
+import { useDeleteMettleProduct } from 'hooks';
+import { MettleProduct } from 'interfaces';
+import { useEffect, useState } from 'react';
+import { ActionsDropdown } from '../../atoms';
+
+const { Text } = Typography;
+
+export const useMettleProductsTableColumns: () => {
+    columns: ColumnsType<MettleProduct>;
+    isActionLoading: boolean;
+} = () => {
+    const { mutate: deleteProduct, isPending } = useDeleteMettleProduct();
+
+    const [isActionLoading, setIsActionLoading] = useState(isPending);
+
+    useEffect(() => {
+        setIsActionLoading(isPending);
+    }, [isPending]);
+
+    return {
+        isActionLoading,
+        columns: [
+            {
+                key: 'productName',
+                dataIndex: 'productName',
+                title: 'Título',
+            },
+            {
+                key: 'productDescription',
+                dataIndex: 'productDescription',
+                title: 'Descrição',
+            },
+            {
+                key: 'createdAt',
+                dataIndex: 'createdAt',
+                title: 'Criado em',
+                render: (value: string) => new Date(value).toLocaleDateString('pt-BR'),
+            },
+            {
+                key: 'updatedAt',
+                dataIndex: 'updatedAt',
+                title: 'Atualizado em',
+                render: (value: string) => new Date(value).toLocaleDateString('pt-BR'),
+            },
+            {
+                key: 'webhookEndpoint',
+                dataIndex: 'webhookEndpoint',
+                title: 'Webhook de compra bem sucedida (clique para copiar)',
+                render: (value: string) => <Text copyable>{value}</Text>,
+            },
+            {
+                key: 'actions',
+                render: (_, record) => {
+                    return (
+                        <ActionsDropdown
+                            items={[
+                                {
+                                    key: 'delete',
+                                    label: 'Apagar produto',
+                                    onClick: () => {
+                                        if (
+                                            window.confirm(
+                                                'Atenção! Essa ação não pode ser revertida e os usuários que compraram este produto perderão o acesso! Deseja continuar?',
+                                            )
+                                        ) {
+                                            deleteProduct(record.productUuid);
+                                        }
+                                    },
+                                },
+                            ]}
+                        />
+                    );
+                },
+            },
+        ],
+    };
+};

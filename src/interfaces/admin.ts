@@ -5,20 +5,23 @@ export interface IBackofficeDashboardResponse {
     businessCount: number;
 }
 
-export interface IProduct {
+export interface MettleProduct extends Record<string, string> {
     productUuid: string;
-    createdAt: Date['toISOString'];
-    updatedAt: Date['toISOString'];
     productId: string;
     productName: string;
     productDescription: string;
-    productPrice: number;
+    checkoutUrl: string;
+    status: string;
+    contentfulEntryId: string;
+    createdAt: string;
+    updatedAt: string;
+    webhookEndpoint: string;
 }
 
-export interface IProductDTO {
+export interface CreateMettleProductDTO {
     productName: string;
     productDescription: string;
-    productPrice: number;
+    checkoutUrl: string;
 }
 
 export enum MelpStatusEnum {
@@ -84,7 +87,7 @@ export interface IMettleUsersResponse {
 }
 
 export interface IProductsResponse {
-    data: IProduct[];
+    data: MettleProduct[];
     pagination: IPagination;
 }
 

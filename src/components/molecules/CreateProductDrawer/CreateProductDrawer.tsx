@@ -1,6 +1,6 @@
-import { Drawer, Form, Button, Row, Col, Input, InputNumber } from 'antd';
+import { Drawer, Form, Button, Row, Col, Input } from 'antd';
 import { useCreateMettleProduct } from 'hooks';
-import { IProductDTO } from 'interfaces';
+import { CreateMettleProductDTO } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import { Rule } from 'rc-field-form/es/interface';
 import React from 'react';
@@ -20,7 +20,7 @@ export const CreateProductDrawer = ({ open, onClose }: DrawerProps) => {
         onClose();
     };
 
-    const handleCreateProduct = (values: IProductDTO) => {
+    const handleCreateProduct = (values: CreateMettleProductDTO) => {
         createMettleProduct.mutate(values, {
             onSuccess: () => {
                 showNotification('success', 'Sucesso!', `${values.productName} criado com sucesso!`);
@@ -48,12 +48,11 @@ export const CreateProductDrawer = ({ open, onClose }: DrawerProps) => {
                 message: 'A descrição do produto deve ter no máximo 300 caracteres.',
             },
         ],
-        productPrice: [
-            { required: true, message: 'Por favor, digite o preço do produto!' },
+        checkoutUrl: [
+            { required: true, message: 'Insira a url de checkout (carrinho ou pagina de vendas)!' },
             {
-                type: 'number',
-                min: 1,
-                message: 'O preço do produto deve ser maior que 0.',
+                type: 'url',
+                message: 'Insira uma url válida!',
             },
         ],
     };
@@ -73,8 +72,8 @@ export const CreateProductDrawer = ({ open, onClose }: DrawerProps) => {
                         >
                             <Input.TextArea placeholder="Acesso total ao programa de Inglês..." />
                         </Form.Item>
-                        <Form.Item name="productPrice" label="Preço" rules={formRules.productPrice as Rule[]}>
-                            <InputNumber placeholder="199.99" style={{ width: '100%' }} prefix="R$" />
+                        <Form.Item name="checkoutUrl" label="URL de checkout" rules={formRules.checkoutUrl as Rule[]}>
+                            <Input type="text" placeholder="https://hotmart.com.br" style={{ width: '100%' }} />
                         </Form.Item>
 
                         <Button type="primary" htmlType="submit" block loading={createMettleProduct.isPending}>

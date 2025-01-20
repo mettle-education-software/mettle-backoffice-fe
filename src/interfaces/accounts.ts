@@ -3,6 +3,7 @@ export interface ICreateMettleUserDTO {
     firstName: string;
     lastName: string;
     purchaseDate: string;
+    purchasedProducts: string[];
 }
 
 export interface INotification {

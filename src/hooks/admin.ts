@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import {
     IBackofficeDashboardResponse,
     IProductsResponse,
-    IProductDTO,
+    CreateMettleProductDTO,
     QueryParams,
     IMettleUsersResponse,
     ILeaderboardResponse,
@@ -33,7 +33,8 @@ export const useCreateMettleProduct = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationKey: ['create-mettle-product'],
-        mutationFn: (data: IProductDTO) => adminService.post<IProductDTO, null>('/products', data),
+        mutationFn: (data: CreateMettleProductDTO) =>
+            adminService.post<CreateMettleProductDTO, null>('/products', data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-products'],
@@ -50,6 +51,15 @@ export const useDeleteMettleProduct = () => {
     return useMutation({
         mutationKey: ['delete-mettle-product'],
         mutationFn: (productUuid: string) => adminService.delete<null>(`/products/${productUuid}`),
+        onError: async (error) => {
+            console.error(error.message);
+            await queryClient.invalidateQueries({
+                queryKey: ['get-mettle-products'],
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['get-products-short-list'],
+            });
+        },
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-products'],
