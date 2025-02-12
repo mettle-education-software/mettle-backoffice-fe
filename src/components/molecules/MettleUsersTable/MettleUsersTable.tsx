@@ -4,6 +4,7 @@ import { Table, Drawer, Form, Input, Button, Select } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
+import { AddProductToUserDrawer } from 'components/molecules/MettleUsersTable/AddProductToUserDrawer';
 import {
     useGetMailchimpLists,
     useGetMailchimpListTags,
@@ -36,19 +37,15 @@ export const MettleUsersTable = ({
 
     const { data: mettleUsers, isLoading } = useGetMettleUsers(queryParams);
 
-    const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
-    const [isEditMailchimpTagsDrawerOpen, setIsEditMailchimpTagsDrawerOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<IMettleUser | null>(null);
+    const [selectedAction, setSelectedAction] = useState<string | null>(null);
+
+    const isEditMailchimpTagsDrawerOpen = selectedAction === 'editMailchimpTags';
+    const isEditDrawerOpen = selectedAction === 'editUserData';
 
     const onAction = (action: string, record: IMettleUser) => {
-        if (action === 'editUserData') {
-            setSelectedUser(record);
-            setIsEditDrawerOpen(true);
-        }
-        if (action === 'editMailchimpTags') {
-            setSelectedUser(record);
-            setIsEditMailchimpTagsDrawerOpen(true);
-        }
+        setSelectedUser(record);
+        setSelectedAction(action);
     };
 
     const usersColumns = useTableColumns({ isSearchMode: !!searchValue, onAction });
@@ -65,7 +62,7 @@ export const MettleUsersTable = ({
     const updateMettleUserData = useUpdateMettleUser();
 
     const handleCloseEditDrawer = () => {
-        setIsEditDrawerOpen(false);
+        setSelectedAction(null);
         setSelectedUser(null);
         editUserForm.resetFields();
     };
@@ -107,7 +104,7 @@ export const MettleUsersTable = ({
     const { data: mailchimpTags, isLoading: isMailchimpTagsLoading } = useGetMailchimpListTags(mailchimpListId);
 
     const handleCloseMailchimpTagsEditDrawer = () => {
-        setIsEditMailchimpTagsDrawerOpen(false);
+        setSelectedAction(null);
         setSelectedUser(null);
         editMailchimpTagsForm.resetFields();
     };
@@ -348,6 +345,13 @@ export const MettleUsersTable = ({
                     </Form>
                 )}
             </Drawer>
+            <AddProductToUserDrawer
+                mettleUser={selectedUser}
+                open={selectedAction === 'addProducts'}
+                onClose={() => {
+                    setSelectedAction(null);
+                }}
+            />
         </>
     );
 };

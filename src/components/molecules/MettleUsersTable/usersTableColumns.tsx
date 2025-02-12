@@ -129,6 +129,14 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
                         onClick={(e) => e.stopPropagation()}
                         items={[
                             {
+                                key: 'addProducts',
+                                label: 'Adicionar produtos',
+                                onClick: ({ domEvent }) => {
+                                    domEvent.preventDefault();
+                                    onAction('addProducts', record);
+                                },
+                            },
+                            {
                                 key: 'editUserData',
                                 label: 'Editar dados do usuário',
                                 onClick: ({ domEvent }) => {

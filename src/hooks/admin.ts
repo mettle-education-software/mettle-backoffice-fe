@@ -164,3 +164,24 @@ export const useUpdateMettleUserMailchimpTags = () => {
         },
     });
 };
+
+export const useApplyProductToUser = () => {
+    const queryClient = useQueryClient();
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationKey: ['apply-product-to-user'],
+        mutationFn: ({ userUid, productUuid }: { userUid: string; productUuid: string }) =>
+            adminService.put(`/products/${productUuid}/apply/${userUid}`),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['get-mettle-users'],
+            });
+            showNotification('success', 'Successo!', 'Produto adicionado!');
+        },
+        onError: (error) => {
+            const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
+            showNotification('error', 'Erro!', errorMessage ?? 'Algo deu errado. Tente de novo mais tarde.');
+        },
+    });
+};

@@ -45,6 +45,9 @@ export interface IMettleUser {
         tags?: string[];
         listId?: string;
     };
+    customClaims: {
+        roles: string[];
+    };
     last_login: string | null;
     last_time_active: string | null;
     overall_performance: number;
