@@ -53,6 +53,7 @@ export interface IMettleUser {
     overall_performance: number;
     melp_status: MelpStatus;
     status: string;
+    lastLogin: string;
     // TODO -> ADD ENUM LATER
 }
 

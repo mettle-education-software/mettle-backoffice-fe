@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, Card, Col, Input, Row, Tabs } from 'antd';
-import { Text, AppLayout, MettleUsersTable, CreateMettleUserDrawer } from 'components';
+import { Button, Card, Col, Flex, Input, Row, Tabs } from 'antd';
+import { Text, AppLayout, MettleUsersTable, CreateMettleUserDrawer, DownloadUsersReport } from 'components';
 import { withAuthentication } from 'libs';
 import React, { useState } from 'react';
 
@@ -72,13 +72,16 @@ function Accounts() {
                             },
                         ]}
                         tabBarExtraContent={
-                            <Input.Search
-                                placeholder="Pesquisar"
-                                onSearch={(value) => {
-                                    setSearchValue(value);
-                                }}
-                                allowClear
-                            />
+                            <Flex gap={24}>
+                                <DownloadUsersReport />
+                                <Input.Search
+                                    placeholder="Pesquisar"
+                                    onSearch={(value) => {
+                                        setSearchValue(value);
+                                    }}
+                                    allowClear
+                                />
+                            </Flex>
                         }
                     />
                 </Col>

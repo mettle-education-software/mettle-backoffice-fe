@@ -14,6 +14,7 @@ import {
 } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import { adminService } from 'services';
+import { saveBlobAsFile } from 'utils/filteUtils';
 
 export const useGetBackofficeDashboard = () => {
     return useQuery({
@@ -182,6 +183,23 @@ export const useApplyProductToUser = () => {
         onError: (error) => {
             const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
             showNotification('error', 'Erro!', errorMessage ?? 'Algo deu errado. Tente de novo mais tarde.');
+        },
+    });
+};
+
+export const useDownloadUsersCSV = () => {
+    const { showNotification } = useNotificationsContext();
+
+    return useMutation({
+        mutationFn: () => adminService.get<string>('/v2/users/report').then(({ data }) => data),
+        onSuccess: (data) => {
+            const dataBlob = new Blob([data], {
+                type: 'text/csv;charset=utf-8;',
+            });
+            saveBlobAsFile(dataBlob, 'mettle_users.csv');
+        },
+        onError: () => {
+            showNotification('error', 'Erro!', 'Algo deu errado. Tente de novo mais tarde.');
         },
     });
 };

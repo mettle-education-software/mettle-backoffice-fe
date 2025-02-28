@@ -52,6 +52,7 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             showSorterTooltip: {
                 title: 'Clique para ordenar por e-mail',
             },
+            width: 200,
         },
         {
             title: 'Nome',
@@ -61,6 +62,7 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             showSorterTooltip: {
                 title: 'Clique para ordenar por nome',
             },
+            width: 200,
         },
         {
             title: 'Sobrenome',
@@ -70,11 +72,13 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             showSorterTooltip: {
                 title: 'Clique para ordenar por nome',
             },
+            width: 200,
         },
         {
             title: 'Status da conta',
             dataIndex: 'status',
             render: (value) => <Tag>{value}</Tag>,
+            width: 200,
         },
         {
             title: 'IMERSO Status',
@@ -88,6 +92,7 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             //       ]
             //     : undefined,
             // filterMultiple: false,
+            width: 200,
         },
         {
             title: 'Tags do Mailchimp',
@@ -97,30 +102,37 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
                 !mailchimp_metadata || mailchimp_metadata.tags?.length === 0
                     ? '-'
                     : mailchimp_metadata.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>),
+            width: 200,
         },
         {
             title: 'Performance geral (%)',
             dataIndex: 'overall_performance',
             key: 'overall_performance',
             render: (value) => (value ? `${value.toFixed(2)}%` : '-'),
+            width: 200,
         },
         {
             title: 'Data de criação',
             dataIndex: 'created_at',
             render: (value) => new Date(value).toLocaleDateString() || '-',
+            width: 200,
         },
         {
             title: 'Data do último login',
-            dataIndex: 'last_login',
-            key: 'last_login',
+            dataIndex: 'lastLogin',
+            key: 'lastLogin',
             render: (value) => (!value ? 'Não fez login' : new Date(value).toLocaleDateString()),
+            width: 200,
         },
         {
             title: 'Data da última atividade',
             dataIndex: 'last_time_active',
             render: (value) => (!value ? '-' : new Date(value).toLocaleDateString()),
+            width: 200,
         },
         {
+            fixed: true,
+            width: 50,
             key: 'tableActions',
             dataIndex: 'user_uid',
             render: (user_uid, record) =>

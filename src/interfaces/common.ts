@@ -18,6 +18,7 @@ export type HTTPOptions<D = unknown> = {
         throwIfRequested(): void;
     };
     headers?: Record<string, string>;
+    // responseType?: string;
 };
 
 export interface HTTPResponse<T> {

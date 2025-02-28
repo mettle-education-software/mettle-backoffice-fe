@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Drawer, Form, Input, Button, Select } from 'antd';
+import { Table, Drawer, Form, Input, Button, Select, Card } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
@@ -172,8 +172,9 @@ export const MettleUsersTable = ({
     };
 
     return (
-        <>
+        <Card style={{ width: '100%' }}>
             <Table
+                // scroll={{x: 'max-content'}}
                 rowClassName={styles.row}
                 rowKey={(record) => {
                     if (!record?.user_uid) {
@@ -352,7 +353,7 @@ export const MettleUsersTable = ({
                     setSelectedAction(null);
                 }}
             />
-        </>
+        </Card>
     );
 };
 
