@@ -131,7 +131,7 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             width: 200,
         },
         {
-            fixed: true,
+            fixed: 'right',
             width: 50,
             key: 'tableActions',
             dataIndex: 'user_uid',

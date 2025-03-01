@@ -1,3 +1,4 @@
+import { RawAxiosResponseHeaders, ResponseType } from 'axios';
 import { Rule } from 'rc-field-form/es/interface';
 import React from 'react';
 
@@ -18,6 +19,7 @@ export type HTTPOptions<D = unknown> = {
         throwIfRequested(): void;
     };
     headers?: Record<string, string>;
+    responseType?: ResponseType;
     // responseType?: string;
 };
 
@@ -25,6 +27,7 @@ export interface HTTPResponse<T> {
     status: number;
     statusText: string;
     data: T;
+    headers: RawAxiosResponseHeaders;
 }
 
 export interface HTTPError<T = Record<string, string[]>> {

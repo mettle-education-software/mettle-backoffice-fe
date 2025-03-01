@@ -191,12 +191,19 @@ export const useDownloadUsersCSV = () => {
     const { showNotification } = useNotificationsContext();
 
     return useMutation({
-        mutationFn: () => adminService.get<string>('/v2/users/report').then(({ data }) => data),
-        onSuccess: (data) => {
+        mutationFn: () =>
+            adminService.get<string>('/v2/users/report').then(({ data, headers }) => ({
+                headers,
+                data,
+            })),
+        onSuccess: ({ data, headers }) => {
             const dataBlob = new Blob([data], {
                 type: 'text/csv;charset=utf-8;',
             });
-            saveBlobAsFile(dataBlob, 'mettle_users.csv');
+            const contentDisposition = headers['content-disposition'];
+            const fileName =
+                typeof contentDisposition === 'string' ? contentDisposition.split('filename=')[1] : 'users.csv';
+            saveBlobAsFile(dataBlob, fileName.replace(/"/g, ''));
         },
         onError: () => {
             showNotification('error', 'Erro!', 'Algo deu errado. Tente de novo mais tarde.');

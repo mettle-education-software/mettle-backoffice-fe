@@ -172,9 +172,9 @@ export const MettleUsersTable = ({
     };
 
     return (
-        <Card style={{ width: '100%' }}>
+        <div style={{ width: '100%' }}>
             <Table
-                // scroll={{x: 'max-content'}}
+                scroll={{ x: 'max-content' }}
                 rowClassName={styles.row}
                 rowKey={(record) => {
                     if (!record?.user_uid) {
@@ -353,7 +353,7 @@ export const MettleUsersTable = ({
                     setSelectedAction(null);
                 }}
             />
-        </Card>
+        </div>
     );
 };
 

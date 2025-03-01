@@ -11,10 +11,10 @@ export const DownloadUsersReport: React.FC = () => {
     };
 
     return (
-        <Button disabled onClick={handleDownload} loading={isPending} type="primary">
+        <Button onClick={handleDownload} loading={isPending} type="primary">
             <Flex align="center" gap={8}>
                 <Download style={{ fontSize: 16 }} />
-                <span>Download users list</span>
+                <span>Lista de usuários (CSV)</span>
             </Flex>
         </Button>
     );
