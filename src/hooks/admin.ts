@@ -103,6 +103,13 @@ export const useGetMailchimpListTags = (listId?: string) => {
     });
 };
 
+export const useSaveProductMailchimpList = () => {
+    return useMutation({
+        mutationFn: (data: { productId: string; listId: string }) =>
+            adminService.put(`mailchimp/lists/${data.listId}/products/${data.productId}`),
+    });
+};
+
 export const useGetAllMailchimpTags = () => {
     return useQuery({
         queryKey: ['get-all-mailchimp-tags'],

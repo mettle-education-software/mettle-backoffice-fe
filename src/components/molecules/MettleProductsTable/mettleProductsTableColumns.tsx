@@ -9,13 +9,26 @@ import { ActionsDropdown } from '../../atoms';
 
 const { Text } = Typography;
 
+type Action = {
+    key: string | null;
+    data: Record<string, string | number | boolean | null | undefined>;
+} | null;
+
 export const useMettleProductsTableColumns: () => {
     columns: ColumnsType<MettleProduct>;
     isActionLoading: boolean;
+    action: Action;
+    defineAction: (action: Action) => void;
 } = () => {
     const { mutate: deleteProduct, isPending } = useDeleteMettleProduct();
 
     const [isActionLoading, setIsActionLoading] = useState(isPending);
+
+    const [action, setAction] = useState<Action>(null);
+
+    const defineAction = (newAction: Action) => {
+        setAction(newAction);
+    };
 
     useEffect(() => {
         setIsActionLoading(isPending);
@@ -23,6 +36,8 @@ export const useMettleProductsTableColumns: () => {
 
     return {
         isActionLoading,
+        action,
+        defineAction,
         columns: [
             {
                 key: 'productName',
@@ -58,6 +73,16 @@ export const useMettleProductsTableColumns: () => {
                     return (
                         <ActionsDropdown
                             items={[
+                                {
+                                    key: 'addMailchimpList',
+                                    label: 'Adicionar lista do Mailchimp aos compradores do produto',
+                                    onClick: () => {
+                                        setAction({
+                                            key: 'addMailchimpList',
+                                            data: record,
+                                        });
+                                    },
+                                },
                                 {
                                     key: 'delete',
                                     label: 'Apagar produto',
