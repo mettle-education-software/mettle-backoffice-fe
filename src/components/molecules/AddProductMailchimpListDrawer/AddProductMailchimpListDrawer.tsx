@@ -19,14 +19,19 @@ export const AddProductMailchimpListDrawer: React.FC<AddProductMailchimpListDraw
 
     const { data: mailchimpLists } = useGetMailchimpLists();
 
-    const { mutate: saveListToProduct } = useSaveProductMailchimpList();
+    const { mutate: saveListToProduct, isPending } = useSaveProductMailchimpList();
 
     const handleSave = () => {
         if (!selectedListId) return;
-        saveListToProduct({
-            productId,
-            listId: selectedListId,
-        });
+        saveListToProduct(
+            {
+                productId,
+                listId: selectedListId,
+            },
+            {
+                onSuccess: handleClose,
+            },
+        );
     };
 
     return (
@@ -39,7 +44,7 @@ export const AddProductMailchimpListDrawer: React.FC<AddProductMailchimpListDraw
                     <Button block danger onClick={handleClose}>
                         Cancelar
                     </Button>
-                    <Button block type="primary" onClick={handleSave}>
+                    <Button loading={isPending} block type="primary" onClick={handleSave}>
                         Salvar alterações
                     </Button>
                 </Flex>
