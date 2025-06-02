@@ -104,9 +104,19 @@ export const useGetMailchimpListTags = (listId?: string) => {
 };
 
 export const useSaveProductMailchimpList = () => {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: (data: { productId: string; listId: string }) =>
             adminService.put(`mailchimp/lists/${data.listId}/products/${data.productId}`),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['get-mettle-products'],
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['get-products-short-list'],
+            });
+        },
     });
 };
 
