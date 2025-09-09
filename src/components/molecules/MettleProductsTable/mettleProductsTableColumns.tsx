@@ -62,10 +62,40 @@ export const useMettleProductsTableColumns: () => {
                 render: (value: string) => new Date(value).toLocaleDateString('pt-BR'),
             },
             {
-                key: 'webhookEndpoint',
-                dataIndex: 'webhookEndpoint',
-                title: 'Webhook de compra bem sucedida (clique para copiar)',
-                render: (value: string) => <Text copyable>{value}</Text>,
+                key: 'webhookEndpointHotmart',
+                dataIndex: 'webhookEndpointHotmart',
+                title: 'HOTMART webhook de compra bem sucedida (clique para copiar)',
+                render: (value: string) => (
+                    <Text
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            navigator.clipboard.writeText(value).then(() => {
+                                alert('Copiado para a área de transferência!');
+                            });
+                        }}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                        Clique pra copiar
+                    </Text>
+                ),
+            },
+            {
+                key: 'webhookEndpointHerospark',
+                dataIndex: 'webhookEndpointHerospark',
+                title: 'HEROSPARK webhook de compra bem sucedida (clique para copiar)',
+                render: (value: string) => (
+                    <Text
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            navigator.clipboard.writeText(value).then(() => {
+                                alert('Copiado para a área de transferência!');
+                            });
+                        }}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                        Clique pra copiar
+                    </Text>
+                ),
             },
             {
                 key: 'actions',
