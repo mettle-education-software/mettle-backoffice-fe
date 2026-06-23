@@ -2,6 +2,7 @@
 
 import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
+import { Report } from '@mui/icons-material';
 import GroupIcon from '@mui/icons-material/Group';
 import { Layout, Menu } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
@@ -128,6 +129,15 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
                                 onClick: ({ domEvent }) => {
                                     domEvent.preventDefault();
                                     router.push('/accounts');
+                                },
+                            },
+                            {
+                                key: 'reports',
+                                icon: <Report />,
+                                label: 'Relatórios',
+                                onClick: ({ domEvent }) => {
+                                    domEvent.preventDefault();
+                                    router.push('/reports');
                                 },
                             },
                         ]}

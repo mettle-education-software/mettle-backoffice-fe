@@ -1,18 +1,12 @@
 'use client';
 
-import { Table, Drawer, Form, Input, Button, Select, Card } from 'antd';
+import { Table, Drawer, Form, Input, Button } from 'antd';
 import { AnyObject } from 'antd/es/_util/type';
 import { ColumnsType } from 'antd/es/table';
 import { SorterResult } from 'antd/es/table/interface';
 import { AddProductToUserDrawer } from 'components/molecules/MettleUsersTable/AddProductToUserDrawer';
-import {
-    useGetMailchimpLists,
-    useGetMailchimpListTags,
-    useGetMettleUsers,
-    useUpdateMettleUser,
-    useUpdateMettleUserMailchimpTags,
-} from 'hooks';
-import { IMettleUser, IUpdateUserDataDTO, IUpdateUserMailchimpTagsDTO, QueryParams } from 'interfaces';
+import { useGetMettleUsers, useUpdateMettleUser } from 'hooks';
+import { IMettleUser, IUpdateUserDataDTO, QueryParams } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
 import styles from './MettleUsersTable.module.css';
@@ -40,7 +34,6 @@ export const MettleUsersTable = ({
     const [selectedUser, setSelectedUser] = useState<IMettleUser | null>(null);
     const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
-    const isEditMailchimpTagsDrawerOpen = selectedAction === 'editMailchimpTags';
     const isEditDrawerOpen = selectedAction === 'editUserData';
 
     const onAction = (action: string, record: IMettleUser) => {
@@ -97,52 +90,6 @@ export const MettleUsersTable = ({
         );
     };
 
-    const [editMailchimpTagsForm] = Form.useForm();
-    const mailchimpListId = Form.useWatch('mailchimpListId', editMailchimpTagsForm);
-
-    const { data: mailchimpLists } = useGetMailchimpLists();
-    const { data: mailchimpTags, isLoading: isMailchimpTagsLoading } = useGetMailchimpListTags(mailchimpListId);
-
-    const handleCloseMailchimpTagsEditDrawer = () => {
-        setSelectedAction(null);
-        setSelectedUser(null);
-        editMailchimpTagsForm.resetFields();
-    };
-
-    const updateUserMailchimpTags = useUpdateMettleUserMailchimpTags();
-
-    const handleMailchimpTagsEditSubmit = (values: AnyObject) => {
-        const currentTags = selectedUser?.mailchimp_metadata?.tags || [];
-
-        const newTags = values.mailchimpTags.map((tag: string) => ({
-            name: tag,
-            status: 'active',
-        }));
-
-        currentTags.forEach((currentTag) => {
-            if (!newTags.find((tag: { name: string; status: string }) => tag.name === currentTag)) {
-                newTags.push({
-                    name: currentTag,
-                    status: 'inactive',
-                });
-            }
-        });
-
-        const dto: IUpdateUserMailchimpTagsDTO = {
-            listId: mailchimpListId,
-            tags: newTags,
-        };
-
-        updateUserMailchimpTags.mutate(
-            { userUid: selectedUser?.user_uid as string, dto },
-            {
-                onSuccess: () => {
-                    handleCloseMailchimpTagsEditDrawer();
-                },
-            },
-        );
-    };
-
     useEffect(() => {
         if (isEditDrawerOpen) {
             editUserForm.setFieldsValue({
@@ -153,16 +100,6 @@ export const MettleUsersTable = ({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditDrawerOpen]);
-
-    useEffect(() => {
-        if (isEditMailchimpTagsDrawerOpen) {
-            editMailchimpTagsForm.setFieldsValue({
-                mailchimpListId: selectedUser?.mailchimp_metadata?.listId,
-                mailchimpTags: selectedUser?.mailchimp_metadata?.tags,
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditMailchimpTagsDrawerOpen]);
 
     const { showNotification } = useNotificationsContext();
 
@@ -235,52 +172,6 @@ export const MettleUsersTable = ({
                     },
                 }}
             />
-            <Drawer
-                onClose={handleCloseMailchimpTagsEditDrawer}
-                open={isEditMailchimpTagsDrawerOpen}
-                footer={
-                    <Button
-                        loading={updateUserMailchimpTags.isPending}
-                        type="primary"
-                        block
-                        size="large"
-                        onClick={() => {
-                            editMailchimpTagsForm.submit();
-                        }}
-                    >
-                        Salvar
-                    </Button>
-                }
-            >
-                {isEditMailchimpTagsDrawerOpen && selectedUser && (
-                    <Form form={editMailchimpTagsForm} layout="vertical" onFinish={handleMailchimpTagsEditSubmit}>
-                        <Form.Item
-                            name="mailchimpListId"
-                            label="Lista do Mailchimp"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Por favor, selecione a lista do Mailchimp',
-                                },
-                            ]}
-                        >
-                            <Select
-                                defaultValue={selectedUser?.mailchimp_metadata?.listId}
-                                options={mailchimpLists?.lists.map(({ name, id }) => ({ label: name, value: id }))}
-                            />
-                        </Form.Item>
-                        <Form.Item name="mailchimpTags" label="Tags do usuário">
-                            <Select
-                                mode="tags"
-                                allowClear
-                                defaultValue={selectedUser?.mailchimp_metadata?.tags}
-                                loading={isMailchimpTagsLoading}
-                                options={mailchimpTags?.tags.map((tag) => ({ label: tag.name, value: tag.name }))}
-                            />
-                        </Form.Item>
-                    </Form>
-                )}
-            </Drawer>
             <Drawer
                 onClose={handleCloseEditDrawer}
                 open={isEditDrawerOpen}
@@ -356,5 +247,3 @@ export const MettleUsersTable = ({
         </div>
     );
 };
-
-// TODO - Refactor this component and split functionalities

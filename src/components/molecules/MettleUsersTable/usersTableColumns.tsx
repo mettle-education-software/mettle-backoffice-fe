@@ -95,16 +95,6 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             width: 200,
         },
         {
-            title: 'Tags do Mailchimp',
-            dataIndex: 'metadata',
-            key: 'mailchimpTags',
-            render: (_, { mailchimp_metadata }) =>
-                !mailchimp_metadata || mailchimp_metadata.tags?.length === 0
-                    ? '-'
-                    : mailchimp_metadata.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>),
-            width: 200,
-        },
-        {
             title: 'Performance geral (%)',
             dataIndex: 'overall_performance',
             key: 'overall_performance',
@@ -154,14 +144,6 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
                                 onClick: ({ domEvent }) => {
                                     domEvent.preventDefault();
                                     onAction('editUserData', record);
-                                },
-                            },
-                            {
-                                key: 'editMailchimpTags',
-                                label: 'Editar tags do Mailchimp',
-                                onClick: ({ domEvent }) => {
-                                    domEvent.preventDefault();
-                                    onAction('editMailchimpTags', record);
                                 },
                             },
                             {

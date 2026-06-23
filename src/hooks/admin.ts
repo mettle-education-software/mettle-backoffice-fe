@@ -7,10 +7,7 @@ import {
     QueryParams,
     IMettleUsersResponse,
     ILeaderboardResponse,
-    IMailchimpListsResponse,
-    IMailchimpListTagsResponse,
     IUpdateUserDataDTO,
-    IUpdateUserMailchimpTagsDTO,
 } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import { adminService } from 'services';
@@ -87,55 +84,6 @@ export const useGetMelpLeaderboard = () => {
     });
 };
 
-export const useGetMailchimpLists = () => {
-    return useQuery({
-        queryKey: ['get-mailchimp-lists'],
-        queryFn: () => adminService.get<IMailchimpListsResponse>('/mailchimp/lists').then(({ data }) => data),
-    });
-};
-
-export const useGetMailchimpListTags = (listId?: string) => {
-    return useQuery({
-        enabled: !!listId,
-        queryKey: ['get-mailchimp-list-tags', listId],
-        queryFn: () =>
-            adminService.get<IMailchimpListTagsResponse>(`/mailchimp/lists/${listId}/tags`).then(({ data }) => data),
-    });
-};
-
-export const useSaveProductMailchimpList = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: { productId: string; listId: string }) =>
-            adminService.put(`mailchimp/lists/${data.listId}/products/${data.productId}`),
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: ['get-mettle-products'],
-            });
-            await queryClient.invalidateQueries({
-                queryKey: ['get-products-short-list'],
-            });
-        },
-    });
-};
-
-export const useGetAllMailchimpTags = () => {
-    return useQuery({
-        queryKey: ['get-all-mailchimp-tags'],
-        queryFn: async () => {
-            const lists = await adminService.get<IMailchimpListsResponse>('/mailchimp/lists').then(({ data }) => data);
-            const allTagsResponses = await Promise.all(
-                lists.lists.map(async ({ id }) => {
-                    return await adminService.get<IMailchimpListTagsResponse>(`/mailchimp/lists/${id}/tags`);
-                }),
-            );
-            const tags = allTagsResponses.map(({ data }) => data.tags).flat();
-            return tags;
-        },
-    });
-};
-
 export const useUpdateMettleUser = () => {
     const queryClient = useQueryClient();
     const { showNotification } = useNotificationsContext();
@@ -149,32 +97,6 @@ export const useUpdateMettleUser = () => {
             await queryClient.invalidateQueries({
                 queryKey: ['get-mettle-users'],
             });
-        },
-        onError: (error) => {
-            const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
-            showNotification('error', 'Erro!', errorMessage ?? 'Algo deu errado. Tente de novo mais tarde.');
-        },
-    });
-};
-
-export const useUpdateMettleUserMailchimpTags = () => {
-    const queryClient = useQueryClient();
-    const { showNotification } = useNotificationsContext();
-
-    return useMutation({
-        mutationKey: ['update-mettle-mailchimp-tags'],
-        mutationFn: ({ userUid, dto }: { userUid: string; dto: IUpdateUserMailchimpTagsDTO }) =>
-            adminService.patch<
-                IUpdateUserMailchimpTagsDTO,
-                {
-                    message: string;
-                }
-            >(`/users/${userUid}/mailchimp-tags`, dto),
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: ['get-mettle-users'],
-            });
-            showNotification('success', 'Successo!', 'Tags do Mailchimp atualizadas com sucesso!');
         },
         onError: (error) => {
             const errorMessage = error instanceof AxiosError ? error.response?.data : error?.message;
@@ -208,8 +130,8 @@ export const useDownloadUsersCSV = () => {
     const { showNotification } = useNotificationsContext();
 
     return useMutation({
-        mutationFn: () =>
-            adminService.get<string>('/v2/users/report').then(({ data, headers }) => ({
+        mutationFn: (params?: QueryParams) =>
+            adminService.get<string>('/v2/users/report', { params }).then(({ data, headers }) => ({
                 headers,
                 data,
             })),

@@ -1,7 +1,6 @@
 'use client';
 
 import { Table } from 'antd';
-import { AddProductMailchimpListDrawer } from 'components';
 import { useGetMettleProducts } from 'hooks';
 import React from 'react';
 import { useMettleProductsTableColumns } from './mettleProductsTableColumns';
@@ -19,11 +18,6 @@ export const MettleProductsTable: React.FC = () => {
                 loading={isLoading || isRefetching || isActionLoading}
                 columns={columns}
                 dataSource={data?.data || []}
-            />
-            <AddProductMailchimpListDrawer
-                productId={action?.data?.productUuid as string}
-                open={action?.key === 'addMailchimpList'}
-                handleClose={() => defineAction(null)}
             />
         </>
     );

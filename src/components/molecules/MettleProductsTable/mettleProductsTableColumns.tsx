@@ -104,16 +104,6 @@ export const useMettleProductsTableColumns: () => {
                         <ActionsDropdown
                             items={[
                                 {
-                                    key: 'addMailchimpList',
-                                    label: 'Adicionar lista do Mailchimp aos compradores do produto',
-                                    onClick: () => {
-                                        setAction({
-                                            key: 'addMailchimpList',
-                                            data: record,
-                                        });
-                                    },
-                                },
-                                {
                                     key: 'delete',
                                     label: 'Apagar produto',
                                     onClick: () => {
