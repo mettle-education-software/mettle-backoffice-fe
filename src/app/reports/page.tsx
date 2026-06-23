@@ -1,7 +1,6 @@
 'use client';
 
-import { DownloadOutlined, InfoCircleOutlined, InfoOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Info } from '@mui/icons-material';
+import { DownloadOutlined, InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Col, DatePicker, Divider, Form, Row, Select, Space, Spin, Tooltip } from 'antd';
 import { AppLayout } from 'components';
 import type { Dayjs } from 'dayjs';
@@ -26,7 +25,7 @@ const melpStatusOptions = [
     { label: 'DEDA iniciado', value: 'DEDA_STARTED' },
     { label: 'DEDA pausado', value: 'DEDA_PAUSED' },
     { label: 'DEDA finalizado', value: 'DEDA_FINISHED' },
-    { label: 'MELP suspenso', value: 'MELP_SUSPENDED' },
+    { label: 'IMERSO suspenso', value: 'MELP_SUSPENDED' },
 ];
 
 const orderByFieldOptions = [
@@ -150,11 +149,12 @@ function Reports() {
                                         </Form.Item>
                                     </Col>
 
-                                    <Col xs={24} md={12} lg={8} xl={4}>
+                                    <Col xs={24} md={12} lg={8} xl={8}>
                                         <Form.Item label="Ordenar por">
                                             <Space.Compact block>
                                                 <Form.Item name="orderByField" noStyle>
                                                     <Select
+                                                        style={{ width: '280px' }}
                                                         allowClear
                                                         placeholder="Campo"
                                                         options={orderByFieldOptions}
