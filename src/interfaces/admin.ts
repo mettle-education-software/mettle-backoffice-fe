@@ -41,10 +41,6 @@ export interface IMettleUser {
     email: string;
     first_name: string;
     last_name: string;
-    mailchimp_metadata?: {
-        tags?: string[];
-        listId?: string;
-    };
     customClaims: {
         roles: string[];
     };
@@ -57,32 +53,10 @@ export interface IMettleUser {
     // TODO -> ADD ENUM LATER
 }
 
-export interface IMailchimpListsResponse {
-    lists: {
-        id: string;
-        name: string;
-    }[];
-}
-
-export interface IMailchimpListTagsResponse {
-    tags: {
-        id: number;
-        name: string;
-    }[];
-}
-
 export interface IUpdateUserDataDTO {
     firstName?: string;
     lastName?: string;
     email?: string;
-}
-
-export interface IUpdateUserMailchimpTagsDTO {
-    listId: string;
-    tags: {
-        name: string;
-        status: 'active' | 'inactive';
-    }[];
 }
 
 export interface IMettleUsersResponse {

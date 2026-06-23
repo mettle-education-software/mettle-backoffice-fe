@@ -3,4 +3,3 @@ export { CreateMettleUserDrawer } from './CreateMettleUserDrawer/CreateMettleUse
 export { MettleUsersTable } from './MettleUsersTable/MettleUsersTable';
 export { MelpLeaderboard } from './MelpLeaderboard/MelpLeaderboard';
 export { MettleProductsTable } from './MettleProductsTable/MettleProductsTable';
-export { AddProductMailchimpListDrawer } from './AddProductMailchimpListDrawer/AddProductMailchimpListDrawer';

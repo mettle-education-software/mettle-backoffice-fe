@@ -3,4 +3,3 @@ export { Text } from './Text/Text';
 export { UserMenu } from './UserMenu/UserMenu';
 export { ActionsDropdown } from './ActionsDropdown/ActionsDropdown';
 export { ProfilePicture } from './ProfilePicture/ProfilePicture';
-export { DownloadUsersReport } from './DownloadUsersReport/DownloadUsersReport';
