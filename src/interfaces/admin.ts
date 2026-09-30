@@ -80,3 +80,37 @@ export interface ILeaderUser {
 export interface ILeaderboardResponse {
     data: ILeaderUser[];
 }
+
+export type ProductAccessState = 'none' | 'active' | 'grace' | 'expired';
+
+export interface IUserProductAccess {
+    product: string;
+    state: ProductAccessState;
+    expiring: boolean;
+    expiresAt: string | null;
+    graceUntil: string | null;
+    refundedAt: string | null;
+    source: string;
+    sourceRef: string | null;
+    updatedAt: string;
+}
+
+export interface IProductAccessLogEntry {
+    id: number;
+    product: string;
+    before: Record<string, unknown> | null;
+    after: Record<string, unknown> | null;
+    actor: string;
+    reason: string | null;
+    at: string;
+}
+
+export interface IUserProductAccessResponse {
+    data: { products: IUserProductAccess[]; log: IProductAccessLogEntry[] };
+}
+
+export interface IUpdateUserProductAccessDTO {
+    product: string;
+    expiresAt: string | null; // null = vitalício
+    reason: string;
+}
