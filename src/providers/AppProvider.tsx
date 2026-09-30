@@ -38,25 +38,39 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
             const token = await user.getIdTokenResult(true);
             const { claims } = token;
 
-            const splitName = (claims?.name as string).split(' ');
+            const nameParts = String(claims?.name ?? '')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
 
             setUser({
                 email: claims.email,
-                name: `${splitName[0]} ${splitName[1]}`,
-                roles: claims.roles,
+                name: nameParts.slice(0, 2).join(' ') || String(claims.email ?? ''),
+                roles: Array.isArray(claims.roles) ? claims.roles : [],
                 uid: claims.user_id,
                 businessUuid: claims.businessUuid,
                 profileImageSrc: user.photoURL || null,
             });
+        } else {
+            setUser(null);
         }
         setIsAppLoading(false);
     };
 
     useEffect(() => {
-        auth.beforeAuthStateChanged(() => {
+        const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
             setIsAppLoading(true);
         });
-        auth.onAuthStateChanged(handleUserTokenChange);
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            handleUserTokenChange(authUser).catch(() => {
+                setUser(null);
+                setIsAppLoading(false);
+            });
+        });
+        return () => {
+            unsubscribeBefore();
+            unsubscribe();
+        };
     }, []);
 
     return (

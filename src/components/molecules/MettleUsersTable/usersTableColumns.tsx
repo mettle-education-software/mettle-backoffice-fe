@@ -13,6 +13,15 @@ interface UseTableColumnsProps {
 }
 
 export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps) => {
+    const copyIdItem = (record: IMettleUser) => ({
+        key: 'copyId',
+        label: 'Copiar ID',
+        onClick: ({ domEvent }: { domEvent: React.MouseEvent | React.KeyboardEvent }) => {
+            domEvent.preventDefault();
+            onAction('copyId', record);
+        },
+    });
+
     const router = useRouter();
     const { showNotification } = useNotificationsContext();
     const deleteMettleUser = useDeleteMettleUser();
@@ -126,10 +135,13 @@ export const useTableColumns = ({ isSearchMode, onAction }: UseTableColumnsProps
             key: 'tableActions',
             dataIndex: 'user_uid',
             render: (user_uid, record) =>
-                record.status === 'ARCHIVED' ? null : (
+                record.status === 'ARCHIVED' ? (
+                    <ActionsDropdown onClick={(e) => e.stopPropagation()} items={[copyIdItem(record)]} />
+                ) : (
                     <ActionsDropdown
                         onClick={(e) => e.stopPropagation()}
                         items={[
+                            copyIdItem(record),
                             {
                                 key: 'addProducts',
                                 label: 'Adicionar produtos',
