@@ -170,9 +170,21 @@ export const useUpdateUserProductAccess = (userUid: string) => {
     return useMutation({
         mutationKey: ['update-user-product-access', userUid],
         mutationFn: (payloadData: IUpdateUserProductAccessDTO) =>
-            adminService.put<IUpdateUserProductAccessDTO, unknown>(`/v2/users/${userUid}/product-access`, payloadData),
-        onSuccess: async () => {
-            showNotification('success', 'Sucesso!', 'Validade atualizada.');
+            adminService.put<IUpdateUserProductAccessDTO, { data?: { claimsSynced?: boolean } }>(
+                `/v2/users/${userUid}/product-access`,
+                payloadData,
+            ),
+        onSuccess: async (response) => {
+            // a validade foi gravada; se o login (Firebase) não sincronizou, avisa em vez de dar sucesso limpo
+            if (response?.data?.data?.claimsSynced === false) {
+                showNotification(
+                    'warning',
+                    'Validade salva',
+                    'Sincronização do login pendente. Salve de novo em alguns minutos para concluir.',
+                );
+            } else {
+                showNotification('success', 'Sucesso!', 'Validade atualizada.');
+            }
             await queryClient.invalidateQueries({ queryKey: ['get-user-product-access', userUid] });
         },
         onError: (error) => {
