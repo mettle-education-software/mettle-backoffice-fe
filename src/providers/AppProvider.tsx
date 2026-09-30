@@ -33,9 +33,10 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
     const [user, setUser] = useState<any>(null);
     const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
 
-    const handleUserTokenChange = async (user: User | null) => {
+    const handleUserTokenChange = async (user: User | null, isCurrent: () => boolean) => {
         if (user) {
             const token = await user.getIdTokenResult(true);
+            if (!isCurrent()) return;
             const { claims } = token;
 
             const nameParts = String(claims?.name ?? '')
@@ -61,13 +62,19 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
         const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
             setIsAppLoading(true);
         });
+        // Resultado de token de um evento antigo (logout/troca de usuário) é ignorado.
+        let generation = 0;
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
-            handleUserTokenChange(authUser).catch(() => {
+            const current = ++generation;
+            const isCurrent = () => current === generation;
+            handleUserTokenChange(authUser, isCurrent).catch(() => {
+                if (!isCurrent()) return;
                 setUser(null);
                 setIsAppLoading(false);
             });
         });
         return () => {
+            generation++;
             unsubscribeBefore();
             unsubscribe();
         };

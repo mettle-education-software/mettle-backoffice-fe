@@ -14,28 +14,30 @@ export const withAuthentication = (Component) => (props) => {
     const router = useRouter();
 
     useEffect(() => {
-        let active = true;
+        // Cada evento de auth invalida as checagens anteriores (logout/troca de usuário no meio do await).
+        let generation = 0;
         const deny = () => {
-            if (!active) return;
             setAccess({ status: 'denied', user: null });
             signOut(auth).catch(() => {});
             router.push('/');
         };
 
         const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+            const current = ++generation;
             if (!authUser) return deny();
             setAccess({ status: 'checking', user: null });
             try {
                 const { claims } = await authUser.getIdTokenResult();
+                if (current !== generation) return;
                 if (!isMettleAdmin(claims)) return deny();
-                if (active) setAccess({ status: 'authorized', user: authUser });
+                setAccess({ status: 'authorized', user: authUser });
             } catch (error) {
-                deny();
+                if (current === generation) deny();
             }
         });
 
         return () => {
-            active = false;
+            generation++;
             unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
