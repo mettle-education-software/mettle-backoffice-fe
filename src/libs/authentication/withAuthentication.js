@@ -22,22 +22,30 @@ export const withAuthentication = (Component) => (props) => {
             router.push('/');
         };
 
+        // Logout/troca começa aqui: invalida na hora qualquer checagem pendente.
+        const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
+            generation++;
+        });
+        // Resultado só vale se ainda for o mesmo evento e o mesmo usuário logado.
+        const isStale = (current, authUser) => current !== generation || auth.currentUser?.uid !== authUser.uid;
+
         const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
             const current = ++generation;
             if (!authUser) return deny();
             setAccess({ status: 'checking', user: null });
             try {
                 const { claims } = await authUser.getIdTokenResult();
-                if (current !== generation) return;
+                if (isStale(current, authUser)) return;
                 if (!isMettleAdmin(claims)) return deny();
                 setAccess({ status: 'authorized', user: authUser });
             } catch (error) {
-                if (current === generation) deny();
+                if (!isStale(current, authUser)) deny();
             }
         });
 
         return () => {
             generation++;
+            unsubscribeBefore();
             unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -59,14 +59,16 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
     };
 
     useEffect(() => {
+        // Resultado de token de um evento antigo (logout/troca de usuário) é ignorado:
+        // a geração muda já no início da transição e o uid tem de continuar o mesmo.
+        let generation = 0;
         const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
+            generation++;
             setIsAppLoading(true);
         });
-        // Resultado de token de um evento antigo (logout/troca de usuário) é ignorado.
-        let generation = 0;
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
             const current = ++generation;
-            const isCurrent = () => current === generation;
+            const isCurrent = () => current === generation && auth.currentUser?.uid === authUser?.uid;
             handleUserTokenChange(authUser, isCurrent).catch(() => {
                 if (!isCurrent()) return;
                 setUser(null);
