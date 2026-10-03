@@ -5,37 +5,54 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+export const isMettleAdmin = (claims) => Array.isArray(claims?.roles) && claims.roles.includes('METTLE_ADMIN');
+
+// Só renderiza a página depois de confirmar o papel METTLE_ADMIN no token.
 // eslint-disable-next-line react/display-name
 export const withAuthentication = (Component) => (props) => {
-    const [nextOrObserver, setNextOrObserver] = useState(null);
+    const [access, setAccess] = useState({ status: 'checking', user: null });
     const router = useRouter();
 
     useEffect(() => {
-        auth.onAuthStateChanged(async (authUser) => {
-            setNextOrObserver(authUser);
+        // Cada evento de auth invalida as checagens anteriores (logout/troca de usuário no meio do await).
+        let generation = 0;
+        const deny = () => {
+            setAccess({ status: 'denied', user: null });
+            signOut(auth).catch(() => {});
+            router.push('/');
+        };
 
-            if (!authUser) {
-                router.push('/');
-            }
+        // Logout/troca começa aqui: invalida na hora qualquer checagem pendente.
+        const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
+            generation++;
+        });
+        // Resultado só vale se ainda for o mesmo evento e o mesmo usuário logado.
+        const isStale = (current, authUser) => current !== generation || auth.currentUser?.uid !== authUser.uid;
 
+        const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+            const current = ++generation;
+            if (!authUser) return deny();
+            setAccess({ status: 'checking', user: null });
             try {
-                const token = await authUser.getIdTokenResult();
-                const { claims } = token;
-                if (!claims?.roles?.some((role) => ['METTLE_ADMIN'].includes(role))) {
-                    signOut(auth);
-                    router.push('/');
-                }
+                const { claims } = await authUser.getIdTokenResult();
+                if (isStale(current, authUser)) return;
+                if (!isMettleAdmin(claims)) return deny();
+                setAccess({ status: 'authorized', user: authUser });
             } catch (error) {
-                signOut(auth);
-                router.push('/');
+                if (!isStale(current, authUser)) deny();
             }
         });
+
+        return () => {
+            generation++;
+            unsubscribeBefore();
+            unsubscribe();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (nextOrObserver) {
-        return <Component {...props} userUid={nextOrObserver.uid} />;
-    }
+    if (access.status !== 'authorized') return null;
+    return <Component {...props} userUid={access.user.uid} />;
 };
 
 // eslint-disable-next-line react/display-name
@@ -44,12 +61,13 @@ export const withoutAuthentication = (Component) => (props) => {
     const router = useRouter();
 
     useEffect(() => {
-        auth.onAuthStateChanged((authUser) => {
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
             setNextOrObserver(authUser);
             if (authUser) {
                 router.push('/home');
             }
         });
+        return unsubscribe;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
