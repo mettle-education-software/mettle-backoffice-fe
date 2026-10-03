@@ -1,7 +1,7 @@
 'use client';
 
 import { Col, Row, Spin } from 'antd';
-import { AppLayout, ProfilePicture, Text } from 'components';
+import { AppLayout, ProfilePicture, Text, UserProductAccess } from 'components';
 import { useGetUserProfile } from 'hooks';
 import { withAuthentication } from 'libs';
 import React from 'react';
@@ -28,6 +28,9 @@ function Profile({ userUid }: { userUid: string }) {
                                 </Row>
                             </Col>
                         </Row>
+                    </Col>
+                    <Col span={24}>
+                        <UserProductAccess userUid={userUid} />
                     </Col>
                 </Row>
             </Spin>
