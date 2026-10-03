@@ -33,30 +33,53 @@ export const AppProvider: React.FC<ProviderProps> = ({ children }) => {
     const [user, setUser] = useState<any>(null);
     const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
 
-    const handleUserTokenChange = async (user: User | null) => {
+    const handleUserTokenChange = async (user: User | null, isCurrent: () => boolean) => {
         if (user) {
             const token = await user.getIdTokenResult(true);
+            if (!isCurrent()) return;
             const { claims } = token;
 
-            const splitName = (claims?.name as string).split(' ');
+            const nameParts = String(claims?.name ?? '')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
 
             setUser({
                 email: claims.email,
-                name: `${splitName[0]} ${splitName[1]}`,
-                roles: claims.roles,
+                name: nameParts.slice(0, 2).join(' ') || String(claims.email ?? ''),
+                roles: Array.isArray(claims.roles) ? claims.roles : [],
                 uid: claims.user_id,
                 businessUuid: claims.businessUuid,
                 profileImageSrc: user.photoURL || null,
             });
+        } else {
+            setUser(null);
         }
         setIsAppLoading(false);
     };
 
     useEffect(() => {
-        auth.beforeAuthStateChanged(() => {
+        // Resultado de token de um evento antigo (logout/troca de usuário) é ignorado:
+        // a geração muda já no início da transição e o uid tem de continuar o mesmo.
+        let generation = 0;
+        const unsubscribeBefore = auth.beforeAuthStateChanged(() => {
+            generation++;
             setIsAppLoading(true);
         });
-        auth.onAuthStateChanged(handleUserTokenChange);
+        const unsubscribe = auth.onAuthStateChanged((authUser) => {
+            const current = ++generation;
+            const isCurrent = () => current === generation && auth.currentUser?.uid === authUser?.uid;
+            handleUserTokenChange(authUser, isCurrent).catch(() => {
+                if (!isCurrent()) return;
+                setUser(null);
+                setIsAppLoading(false);
+            });
+        });
+        return () => {
+            generation++;
+            unsubscribeBefore();
+            unsubscribe();
+        };
     }, []);
 
     return (

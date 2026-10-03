@@ -9,7 +9,6 @@ import { useGetMettleUsers, useUpdateMettleUser } from 'hooks';
 import { IMettleUser, IUpdateUserDataDTO, QueryParams } from 'interfaces';
 import { useNotificationsContext } from 'providers';
 import React, { useEffect, useState } from 'react';
-import styles from './MettleUsersTable.module.css';
 import { useTableColumns } from './usersTableColumns';
 
 export const MettleUsersTable = ({
@@ -36,7 +35,20 @@ export const MettleUsersTable = ({
 
     const isEditDrawerOpen = selectedAction === 'editUserData';
 
+    const { showNotification } = useNotificationsContext();
+
+    const copyUserUid = async (userUid: string) => {
+        await navigator.clipboard.writeText(userUid);
+        showNotification('success', 'Sucesso!', 'ID do usuário copiado para a área de transferência');
+    };
+
     const onAction = (action: string, record: IMettleUser) => {
+        if (action === 'copyId') {
+            copyUserUid(record.user_uid).catch((error) => {
+                showNotification('error', 'Erro!', error.message || 'Algo deu errado. Tente novamente mais tarde.');
+            });
+            return;
+        }
         setSelectedUser(record);
         setSelectedAction(action);
     };
@@ -101,35 +113,16 @@ export const MettleUsersTable = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditDrawerOpen]);
 
-    const { showNotification } = useNotificationsContext();
-
-    const copyUserUid = async (userUid: string) => {
-        await navigator.clipboard.writeText(userUid);
-        showNotification('success', 'Sucesso!', 'ID do usuário copiado para a área de transferência');
-    };
-
     return (
         <div style={{ width: '100%' }}>
             <Table
                 scroll={{ x: 'max-content' }}
-                rowClassName={styles.row}
                 rowKey={(record) => {
                     if (!record?.user_uid) {
                         console.error('no-key', record);
                     }
                     return record?.user_uid ?? 'no-key';
                 }}
-                onRow={(record) => ({
-                    onClick: () => {
-                        copyUserUid(record?.user_uid as string).catch((error) => {
-                            showNotification(
-                                'error',
-                                'Erro!',
-                                error.message || 'Algo deu errado. Tente novamente mais tarde.',
-                            );
-                        });
-                    },
-                })}
                 loading={isLoading}
                 dataSource={mettleUsers?.data || []}
                 columns={usersColumns as ColumnsType<AnyObject>}

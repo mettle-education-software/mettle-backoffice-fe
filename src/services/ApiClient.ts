@@ -27,18 +27,10 @@ class ApiClient implements HTTPClient {
         }
     }
 
+    // Espera o Firebase restaurar a sessão uma vez e lê o usuário atual (sem criar listener por request).
     async getAuthToken() {
-        return new Promise((resolve) => {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    user.getIdToken().then((token) => {
-                        resolve(token);
-                    });
-                } else {
-                    resolve(null);
-                }
-            });
-        });
+        await auth.authStateReady();
+        return auth.currentUser ? auth.currentUser.getIdToken() : null;
     }
 
     setAuthInterceptor() {
